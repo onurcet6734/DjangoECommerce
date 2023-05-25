@@ -15,6 +15,8 @@ class Product(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, default=1)
+    image = models.ImageField(null=True, blank=True)
+
 
     def __str__(self):
         return self.title

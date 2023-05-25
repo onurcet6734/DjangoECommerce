@@ -1,5 +1,8 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product
+from django.shortcuts import render
+from .models import *
 
 def index(request):
-    return render(request, 'index.html')
+    products = Product.objects.all()
+    context = {'products':products}
+    return render(request,"index.html",context)
+
