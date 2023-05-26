@@ -77,17 +77,17 @@
       <h2 class="text-center">Öne Çıkan Ürünler</h2>
       <div class="row">
         {% for product in products %}
-          <div class="col-md-4">
-            <div class="card mb-4">
-              <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" width="300" height="300">
-              <div class="card-body">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" width="300" height="300">
+            <div class="card-body">
                 <h5 class="card-title">{{ product.title }}</h5>
                 <p class="card-text">{{ product.description }}</p>
-                <a href="#" class="btn btn-primary btn-block">Detaylar</a>
-              </div>
+                <a href="{% url 'detail' %}" class="btn btn-primary btn-block">Detaylar</a>
             </div>
-          </div>
-        {% endfor %}
+        </div>
+    </div>
+{% endfor %}
       </div>
     </div>
   </section>
@@ -101,6 +101,3 @@
 
 {% endblock %}
 
-{% block jscript %}
-
-{% endblock %}
