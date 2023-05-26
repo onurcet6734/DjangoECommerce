@@ -8,5 +8,4 @@ def index(request):
     return render(request, "index.html", context)
 
 def detail_view(request):
-    # Burada gerekli işlemleri yapabilirsiniz
     return render(request, 'details.html')
