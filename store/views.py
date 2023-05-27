@@ -5,7 +5,6 @@ def index(request):
     products = Product.objects.all()
     categories = Category.objects.all()
 
-    # Kategori filtresi uygula
     category_id = request.GET.get('category_id')
     if category_id:
         products = products.filter(category_id=category_id)
