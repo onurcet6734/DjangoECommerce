@@ -15,5 +15,9 @@ def index(request):
     }
     return render(request, "index.html", context)
 
-def detail_view(request):
-    return render(request, 'details.html')
+def product_detail(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    context = {
+        'product': product
+    }
+    return render(request, 'detail.html', context)

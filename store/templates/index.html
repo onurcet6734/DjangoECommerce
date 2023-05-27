@@ -4,46 +4,6 @@
 
 {% block content %}
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="#">E-Ticaret</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Ana Sayfa</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Ürünler</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="kategoriDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Tüm Kategoriler
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="kategoriDropdown">
-                        {% for category in categories %}
-                          <a class="dropdown-item" href="?category_id={{ category.id }}">{{ category.name }}</a>
-                        {% endfor %}
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">İletişim</a>
-                </li>
-            </ul>
-            <button style="font-size: 20px; position: fixed; top: 10px; right: 10px;"
-                class="btn btn-primary rounded">
-                Sepetim <i class="fa fa-shopping-cart"></i>
-              </button>
-              </div>
-              </div>
-              
-              </nav>
-
-
               <div id="carouselExampleInterval" class="carousel slide" data-ride="carousel">
                   <div class="carousel-inner">
                       <div class="carousel-item active" data-interval="10000">
@@ -67,7 +27,7 @@
               </div>
 
               <section class="section-featured-products">
-    <div class="container">
+    <div class="container" style="margin-top:30px;">
         <h2 class="text-center">Öne Çıkan Ürünler</h2>
         <div class="row">
             {% for product in products %}
@@ -78,8 +38,8 @@
                                   <div class="card-body">
                                       <h5 class="card-title">{{ product.title }}</h5>
                                       <p class="card-text">{{ product.description }}</p>
-                                      <a href="{% url 'detail' %}" class="btn btn-primary btn-block">Detaylar</a>
-                                  </div>
+                                      <a href="{% url 'detail' product.id %}" class="btn btn-primary btn-block">Detaylar</a>
+                                    </div>
                               </div>
                           </div>
                           {% endfor %}
