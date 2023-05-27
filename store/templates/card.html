@@ -4,51 +4,59 @@
 
 {% block content %}
     <div class="container" style="margin-top: 30px;">
+
+        
+        <div style="position:absolute;top:120px;left:100px;">
+            <img src="{{ product.image.url }}" alt="{{ product.title }}" width="500" height="500">
+        </div>
+
         <div class="row">
+
             <div class="col-md-6 offset-md-3">
-                <h2 class="text-center">Checkout</h2>
+                
+                <h2 class="text-center">Ödeme işlemleri</h2>
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Order Summary</h5>
+                        <h5 class="card-title">Sipariş Bilgisi</h5>
                         <hr>
                         <div class="row">
                             <div class="col-md-6">
-                                <p>Product: {{ product.title }}</p>
-                                <p>Price: ${{ product.price }}</p>
+                                <p>Ürün: {{ product.title }}</p>
+                                <p>Fiyat: ₺{{ product.price }}</p>
                             </div>
                             <div class="col-md-6">
-                                <p>Quantity: 1</p>
-                                <p>Total: ${{ product.price }}</p>
+                                <p>Adet: 1</p>
+                                <p>Toplam Fiyat: ₺{{ product.price }}</p>
                             </div>
                         </div>
                         <hr>
-                        <h5 class="card-title">Payment Details</h5>
+                        <h5 class="card-title">Ödeme Detayları</h5>
                         <form>
                             <div class="form-group">
-                                <label for="name">Name</label>
+                                <label for="name">Adı Soyadı</label>
                                 <input type="text" class="form-control" id="name" placeholder="Enter your name">
                             </div>
                             <div class="form-group">
-                                <label for="email">Email</label>
+                                <label for="email">E-Mail Adresi</label>
                                 <input type="email" class="form-control" id="email" placeholder="Enter your email">
                             </div>
                             <div class="form-group">
-                                <label for="address">Address</label>
+                                <label for="address">Adres</label>
                                 <input type="text" class="form-control" id="address" placeholder="Enter your address">
                             </div>
                             <div class="form-group">
-                                <label for="card-number">Card Number</label>
+                                <label for="card-number">Kart Numarası</label>
                                 <input type="text" class="form-control" id="card-number" placeholder="Enter your card number">
                             </div>
                             <div class="form-group">
-                                <label for="expiry">Expiry Date</label>
+                                <label for="expiry">Son Kullanma Tarihi</label>
                                 <input type="text" class="form-control" id="expiry" placeholder="Enter card expiry date">
                             </div>
                             <div class="form-group">
                                 <label for="cvv">CVV</label>
                                 <input type="text" class="form-control" id="cvv" placeholder="Enter CVV">
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block">Place Order</button>
+                            <button type="submit" class="btn btn-primary btn-block">Sipariş Ver</button>
                         </form>
                     </div>
                 </div>

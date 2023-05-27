@@ -24,11 +24,11 @@ def product_detail(request, product_id):
     }
     return render(request, 'detail.html', context)
 
-def checkout(request, product_id):
+def card(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
     context = {
         'product': product
     }
-    return render(request, "checkout.html", context)
+    return render(request, "card.html", context)
 

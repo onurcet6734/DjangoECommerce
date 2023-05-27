@@ -14,7 +14,7 @@
                 <p>Fiyat: ₺{{ product.price }}</p>
                 <p>Ürün Kategorisi: {{ product.category }}</p>
                 <p>Stok Sayısı: {{ product.stock }}</p>
-                <a href="{% url 'checkout' product_id=product.id %}" class="btn btn-primary">+Sepete Ekle</a>
+                <a href="{% url 'card' product_id=product.id %}" class="btn btn-primary">+Sepete Ekle</a>
             </div>
         </div>
     </div>
