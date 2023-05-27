@@ -21,7 +21,7 @@
         </li>
 
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="kategoriDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <a class="nav-link dropdown-toggle" href="#" id="kategoriDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Tüm Kategoriler
           </a>
           <div class="dropdown-menu" aria-labelledby="kategoriDropdown">
@@ -30,8 +30,6 @@
             {% endfor %}
           </div>
         </li>
-        
-
         
         <li class="nav-item">
           <a class="nav-link" href="#">İletişim</a>
@@ -43,8 +41,6 @@
         Sepetim <i class="fa fa-shopping-cart"></i>
       </button>
       
-      
-                  
     </div>
   </div>
 </nav>
@@ -98,6 +94,20 @@
       <span class="text-muted">© 2023 E-Ticaret Mağazası. Tüm hakları saklıdır.</span>
 </div>
 </footer>
+
+<script>
+  $(document).ready(function() {
+    $('.dropdown').hover(
+      function() {
+        $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeIn(300);
+      },
+      function() {
+        $(this).find('.dropdown-menu').stop(true, true).delay(200).fadeOut(300);
+      }
+    );
+  });
+</script>
+
 
 {% endblock %}
 
