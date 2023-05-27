@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,redirect
 from .models import Category, Product
 
 def index(request):
@@ -17,7 +17,18 @@ def index(request):
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
+    categories = Category.objects.all()
+    
+    context = {
+        'product': product,'categories': categories
+    }
+    return render(request, 'detail.html', context)
+
+def checkout(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
     context = {
         'product': product
     }
-    return render(request, 'detail.html', context)
+    return render(request, "checkout.html", context)
+
