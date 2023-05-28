@@ -8,6 +8,14 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+class Customer(models.Model):
+	user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+	name = models.CharField(max_length=200, null=True)
+	email = models.CharField(max_length=200)
+
+	def __str__(self):
+		return self.name
+
 
 class Product(models.Model):
     title = models.CharField(max_length=100)
@@ -43,6 +51,11 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.pk}"
+    
+    def save(self, *args, **kwargs):
+        self.total_price = self.product.price * self.quantity
+        super().save(*args, **kwargs)
+
 
 
 class Payment(models.Model):
