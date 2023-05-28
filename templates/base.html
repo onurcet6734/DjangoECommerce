@@ -12,16 +12,15 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    
 
-    <link rel = "stylesheet" href ="{% static "style.css" %}">
+    <link rel="stylesheet" href="{% static "style.css" %}">
     {% block css_files%}
 
     {% endblock %}
+
 </head>
 <body>
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">E-Ticaret</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -43,7 +42,7 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="kategoriDropdown">
                             {% for category in categories %}
-                              <a class="dropdown-item" href="?category_id={{ category.id }}">{{ category.name }}</a>
+                            <a class="dropdown-item" href="?category_id={{ category.id }}">{{ category.name }}</a>
                             {% endfor %}
                         </div>
                     </li>
@@ -59,6 +58,8 @@
                   </div>
                   
                   </nav>
+
+                <br/>
 
     {% block content %}
   
