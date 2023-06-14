@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404,redirect
-from .models import Category, Product
+from .models import Category, Product, Order
+from django.contrib import messages
 
 def index(request):
     products = Product.objects.all()
@@ -24,11 +25,31 @@ def product_detail(request, product_id):
     }
     return render(request, 'detail.html', context)
 
-def card(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-
+def cart(request):
+    orders = Order.objects.filter(user=request.user)
+    
     context = {
-        'product': product
+        'orders': orders
     }
-    return render(request, "card.html", context)
+    return render(request, "cart.html", context)
+
+
+def add_to_cart(request):
+    if request.method == 'POST':
+        product_id = request.POST.get('product_id')
+        quantity = int(request.POST.get('quantity', 1))
+        product = Product.objects.get(pk=product_id)
+        
+        order = Order.objects.create(
+            user=request.user,
+            product=product,
+            quantity=quantity,
+            total_price=product.price * quantity,
+            address=request.user.customer.address,
+        )
+        
+        messages.success(request, f"{product.title} sepete eklendi.")
+        
+        return redirect('cart')
+        
 
