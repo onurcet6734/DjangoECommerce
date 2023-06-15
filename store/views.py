@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404,redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Category, Product, Order
 from django.http import JsonResponse
 
@@ -16,36 +16,46 @@ def index(request):
     }
     return render(request, "index.html", context)
 
-def product_detail(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    categories = Category.objects.all()
-    
-    context = {
-        'product': product,'categories': categories
-    }
-    return render(request, 'detail.html', context)
-
 def cart(request):
     orders = Order.objects.filter(user=request.user)
-    
+
     context = {
         'orders': orders
     }
     return render(request, "cart.html", context)
 
-
 def add_to_cart(request, product_id):
     product = Product.objects.get(pk=product_id)
 
     if request.method == 'POST':
-        quantity = request.POST.get('quantity', '1')  # Varsayılan değer olarak '1' kullanılıyor
-       
+        quantity = request.POST.get('quantity', '1')  # default values is '1' s
 
-        cart = request.session.get('cart', [])
-        cart.append({
-            'product_id': product.id,
-            'quantity': quantity
-        })
-        request.session['cart'] = cart
-        print(product_id)
-        return JsonResponse('Item was added')
+        # Create an Order instance and save it to the database
+        order = Order(
+            user=request.user,
+            product=product,
+            quantity=quantity,
+            total_price=product.price * int(quantity)
+        )
+        order.save()
+
+        return JsonResponse({'message': 'Item was added to cart'})
+
+def product_detail(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    if request.method == 'POST':
+        quantity = int(request.POST.get('quantity', 1))
+
+        # Create an Order instance and save it to the database
+        order = Order(
+            user=request.user,
+            product=product,
+            quantity=quantity,
+            total_price=product.price * quantity
+        )
+        order.save()
+
+        return redirect('cart')
+
+    return render(request, 'detail.html', {'product': product})

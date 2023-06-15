@@ -13,6 +13,7 @@
                 <th scope="col">Fiyat</th>
                 <th scope="col">Miktar</th>
                 <th scope="col">Toplam Fiyat</th>
+                <th scope="col"></th>
             </tr>
         </thead>
         <tbody>
@@ -23,6 +24,7 @@
                 <td>₺{{ order.product.price }}</td>
                 <td>{{ order.quantity }}</td>
                 <td>₺{{ order.total_price }}</td>
+                <td><a class="btn btn-danger btn-sm">x</a></td>
             </tr>
             {% endfor %}
         </tbody>

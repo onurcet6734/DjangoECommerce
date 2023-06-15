@@ -47,7 +47,6 @@ class Order(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
-    address = models.ForeignKey(Address, on_delete=models.CASCADE)
     
     def save(self, *args, **kwargs):
         self.total_price = self.product.price * self.quantity
