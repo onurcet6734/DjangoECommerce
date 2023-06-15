@@ -5,7 +5,6 @@
 {% block content %}
     <div class="container" style="margin-top: 75px;">
         <div class="row">
-            
             <div class="col-md-6" style="position:relative;top:-100px;">
                 <img src="{{ product.image.url }}" alt="{{ product.title }}" width="500" height="500">
             </div>
@@ -16,10 +15,11 @@
                 <p>Fiyat: ₺{{ product.price }}</p>
                 <p>Ürün Kategorisi: {{ product.category }}</p>
                 <p>Stok Sayısı:</p>
-                <a href="{% url 'cart' product_id=product.id %}" class="btn btn-primary">+Sepete Ekle</a>
-                
-                {% comment %} <a href="{% url product.id %}" class="btn btn-primary">+Sepete Ekle</a> {% endcomment %}
 
+                <form method="POST" action="{% url 'detail' product_id=product.id %}">
+                    {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary">Sepete Ekle</button>
+            </form>
             </div>
         </div>
     </div>

@@ -8,6 +8,7 @@
     <table class="table">
         <thead>
             <tr>
+                <th scope="col">Resim</th>
                 <th scope="col">Ürün Adı</th>
                 <th scope="col">Fiyat</th>
                 <th scope="col">Miktar</th>
@@ -17,6 +18,7 @@
         <tbody>
             {% for order in orders %}
             <tr>
+                <td><img src="{{ order.product.image.url }}" alt="{{ order.product.title }}" width="100" height="100"></td>
                 <td>{{ order.product.title }}</td>
                 <td>₺{{ order.product.price }}</td>
                 <td>{{ order.quantity }}</td>

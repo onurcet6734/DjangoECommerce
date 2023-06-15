@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404,redirect
 from .models import Category, Product, Order
-from django.contrib import messages
+from django.http import JsonResponse
 
 def index(request):
     products = Product.objects.all()
@@ -34,22 +34,18 @@ def cart(request):
     return render(request, "cart.html", context)
 
 
-def add_to_cart(request):
-    if request.method == 'POST':
-        product_id = request.POST.get('product_id')
-        quantity = int(request.POST.get('quantity', 1))
-        product = Product.objects.get(pk=product_id)
-        
-        order = Order.objects.create(
-            user=request.user,
-            product=product,
-            quantity=quantity,
-            total_price=product.price * quantity,
-            address=request.user.customer.address,
-        )
-        
-        messages.success(request, f"{product.title} sepete eklendi.")
-        
-        return redirect('cart')
-        
+def add_to_cart(request, product_id):
+    product = Product.objects.get(pk=product_id)
 
+    if request.method == 'POST':
+        quantity = request.POST.get('quantity', '1')  # Varsayılan değer olarak '1' kullanılıyor
+       
+
+        cart = request.session.get('cart', [])
+        cart.append({
+            'product_id': product.id,
+            'quantity': quantity
+        })
+        request.session['cart'] = cart
+        print(product_id)
+        return JsonResponse('Item was added')
