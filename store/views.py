@@ -66,3 +66,8 @@ def product_detail(request, product_id):
         return redirect('cart')
 
     return render(request, 'detail.html', {'product': product})
+
+def delete_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    order.delete()
+    return redirect('cart')
