@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Category, Product, Order
+from .models import Category, Product, Order, Customer
 from django.http import JsonResponse
 from django.db.models import Sum
+from .utils import set_customer_cookie, get_customer_from_cookie, delete_customer_cookie
 
 
 def index(request):
