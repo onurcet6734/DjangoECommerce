@@ -3,6 +3,7 @@ from .models import Category, Product, Order
 from django.http import JsonResponse
 from django.db.models import Sum
 
+
 def index(request):
     products = Product.objects.all()
     categories = Category.objects.all()
@@ -30,8 +31,10 @@ def cart(request):
         'orders': orders,
         'total_price_sum': total_price_sum,
         'total_item_count': total_item_count,
+        'categories': Category.objects.all(),
     }
     return render(request, "cart.html", context)
+
 
 
 def add_to_cart(request, product_id):
@@ -82,4 +85,4 @@ def product_detail(request, product_id):
 
     total_item_count = Order.objects.filter(user=request.user).count()
 
-    return render(request, 'detail.html', {'product': product, 'total_item_count': total_item_count})
+    return render(request, 'detail.html', {'product': product, 'total_item_count': total_item_count,  'categories': Category.objects.all()})

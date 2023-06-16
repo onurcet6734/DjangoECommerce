@@ -41,9 +41,11 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="kategoriDropdown">
                             {% for category in categories %}
-                            <a class="dropdown-item" href="?category_id={{ category.id }}">{{ category.name }}</a>
+                            <a class="dropdown-item"  href="{% url 'index' %}?category_id={{ category.id }}">{{ category.name }}</a>
                             {% endfor %}
                         </div>
+
+                          
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">İletişim</a>

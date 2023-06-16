@@ -141,3 +141,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  
 SESSION_SAVE_EVERY_REQUEST = True 
+
+# # Name of cookie
+# SESSION_COOKIE_NAME = 'customer_info'
+
+# # Duration of Cookie (second type)
+# SESSION_COOKIE_AGE = 3600  # Örneğin 1 saat
+
+# # Whether the cookie should be transmitted over HTTPS
+# SESSION_COOKIE_SECURE = True
+
+# # Http path of cookie
+# SESSION_COOKIE_PATH = '/'
