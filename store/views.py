@@ -47,14 +47,21 @@ def product_detail(request, product_id):
     if request.method == 'POST':
         quantity = int(request.POST.get('quantity', 1))
 
-        # Create an Order instance and save it to the database
-        order = Order(
-            user=request.user,
-            product=product,
-            quantity=quantity,
-            total_price=product.price * quantity
-        )
-        order.save()
+        # Check if the product is already in the user's cart
+        try:
+            order = Order.objects.get(user=request.user, product=product)
+            order.quantity += quantity
+            order.total_price = product.price * order.quantity
+            order.save()
+        except Order.DoesNotExist:
+            # Create a new Order instance and save it to the database
+            order = Order(
+                user=request.user,
+                product=product,
+                quantity=quantity,
+                total_price=product.price * quantity
+            )
+            order.save()
 
         return redirect('cart')
 
