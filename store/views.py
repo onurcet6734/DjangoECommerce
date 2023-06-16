@@ -48,6 +48,11 @@ def add_to_cart(request, product_id):
 
         return JsonResponse({'message': 'Item was added to cart'})
 
+def delete_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    order.delete()
+    return redirect('cart')
+
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -76,7 +81,4 @@ def product_detail(request, product_id):
     return render(request, 'detail.html', {'product': product, 'total_price_sum': total_price_sum})
 
 
-def delete_order(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    order.delete()
-    return redirect('cart')
+
