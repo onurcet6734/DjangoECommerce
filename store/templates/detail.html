@@ -15,13 +15,12 @@
                 <p>Fiyat: ₺{{ product.price }}</p>
                 <p>Ürün Kategorisi: {{ product.category }}</p>
                 <p>Stok Sayısı:</p>
-
+            
                 <form method="POST" action="{% url 'detail' product_id=product.id %}">
                     {% csrf_token %}
-                    <input type="number" name="quantity" value="1" min="1">
+                    <input type="number" name="quantity" value="1" min="1" class="form-control" style="width: 80px; display: inline-block;">
                     <button type="submit" class="btn btn-outline-primary">Sepete Ekle</button>
                 </form>
-                
             </div>
         </div>
     </div>
