@@ -49,22 +49,28 @@
                         <a class="nav-link" href="#">İletişim</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'cart' %}"> <i class="fa fa-shopping-cart" style="margin-right: 5px;"></i> Sepetim </a>
+                        <a class="nav-link" href="{% url 'cart' %}">
+                            <i class="fa fa-shopping-cart" style="margin-right: 5px;"></i> Sepetim 
+                            {% if total_item_count %}
+                                <span class="badge badge-pill badge-primary">
+                                    {{ total_item_count }}
+                                </span>
+                            {% endif %}
+                        </a>
                     </li>
+                    
                 </ul>
-        
-                
-                  </div>
-                  </div>
-                  
-                  </nav>
+            </div>
+        </div>
+    </nav>
 
-                <br/>
+    <br/>
 
     {% block content %}
   
     {% endblock %}
 
+    {% block additional_scripts %}
     <script>
         $(document).ready(function () {
             $('.dropdown').hover(
@@ -77,7 +83,7 @@
             );
         });
     </script>
+    {% endblock %}
 
 </body>
-
 </html>

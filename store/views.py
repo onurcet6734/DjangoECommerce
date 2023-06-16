@@ -12,9 +12,12 @@ def index(request):
     if category_id:
         products = products.filter(category_id=category_id)
 
+    total_item_count = Order.objects.filter(user=request.user).count()  # Sepetteki ürün sayısını hesapla
+
     context = {
         'products': products,
-        'categories': categories
+        'categories': categories,
+        'total_item_count': total_item_count  # total_item_count değerini context'e ekle
     }
     return render(request, "index.html", context)
 
@@ -22,13 +25,14 @@ def index(request):
 def cart(request):
     orders = Order.objects.filter(user=request.user)
     total_price_sum = Order.objects.filter(user=request.user).aggregate(Sum('total_price'))['total_price__sum']
+    total_item_count = orders.count()  # Sepetteki toplam ürün sayısı
 
     context = {
         'orders': orders,
-        'total_price_sum': total_price_sum
+        'total_price_sum': total_price_sum,
+        'total_item_count': total_item_count,
     }
     return render(request, "cart.html", context)
-
 
 
 def add_to_cart(request, product_id):
@@ -47,6 +51,7 @@ def add_to_cart(request, product_id):
         order.save()
 
         return JsonResponse({'message': 'Item was added to cart'})
+
 
 def delete_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -75,10 +80,7 @@ def product_detail(request, product_id):
             order.save()
 
         return redirect('cart')
-    
+
     total_price_sum = Order.objects.filter(user=request.user).aggregate(Sum('total_price'))['total_price__sum']
 
     return render(request, 'detail.html', {'product': product, 'total_price_sum': total_price_sum})
-
-
-
