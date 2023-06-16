@@ -12,12 +12,12 @@ def index(request):
     if category_id:
         products = products.filter(category_id=category_id)
 
-    total_item_count = Order.objects.filter(user=request.user).count()  # Sepetteki ürün sayısını hesapla
+    total_item_count = Order.objects.filter(user=request.user).count()  # Number or added products have been calculated
 
     context = {
         'products': products,
         'categories': categories,
-        'total_item_count': total_item_count  # total_item_count değerini context'e ekle
+        'total_item_count': total_item_count  # total_item_count has been included on context
     }
     return render(request, "index.html", context)
 
@@ -25,7 +25,7 @@ def index(request):
 def cart(request):
     orders = Order.objects.filter(user=request.user)
     total_price_sum = Order.objects.filter(user=request.user).aggregate(Sum('total_price'))['total_price__sum']
-    total_item_count = orders.count()  # Sepetteki toplam ürün sayısı
+    total_item_count = orders.count()  # Total order of the cart
 
     context = {
         'orders': orders,
