@@ -3,44 +3,42 @@
 {% block title %}Checkout{% endblock %}
 
 {% block content %}
-<div class="container" style="margin-top: 75px;">
+<div class="container" style="margin-top: 100px;">
     <div class="row">
         <div class="col-md-10">
-            <h2>Sepet</h2>
-            <table class="table" style="position:absolute;right:200px">
-                <thead>
-                    <tr>
-                        <th scope="col">Resim</th>
-                        <th scope="col">Ürün Adı</th>
-                        <th scope="col">Fiyat</th>
-                        <th scope="col">Miktar</th>
-                        <th scope="col">Toplam Fiyat</th>
-                        <th scope="col"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order in orders %}
-                    <tr>
-                        <td><img src="{{ order.product.image.url }}" alt="{{ order.product.title }}" width="100" height="100"></td>
-                        <td>{{ order.product.title }}</td>
-                        <td>₺{{ order.product.price }}</td>
-                        <td>{{ order.quantity }}</td>
-                        <td>₺{{ order.total_price }}</td>
-                        <td>
-                            <form action="{% url 'delete_order' order.id %}" method="POST" id="deleteOrderForm">
-                                {% csrf_token %}
-                                <input type="submit" class="btn btn-danger btn-sm" value="x">
-                            </form>                    
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <td colspan="4"></td>
-                        <td><strong>Toplam Fiyat</strong></td>
-                        <td>₺{{ total_price_sum }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <h2 style="position:absolute; top:-50px;left:-200px;">Sepet</h2>
+            <div class="table-container">
+                <table class="table" style="position:absolute;right:200px">
+                    <thead>
+                        <tr>
+                            <th scope="col">Resim</th>
+                            <th scope="col">Ürün Adı</th>
+                            <th scope="col">Birim Fiyat</th>
+                            <th scope="col">Miktar</th>
+                            <th scope="col">Toplam Fiyat</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td><img src="{{ order.product.image.url }}" alt="{{ order.product.title }}" width="100" height="100"></td>
+                            <td>{{ order.product.title }}</td>
+                            <td>₺{{ order.product.price }}</td>
+                            <td>{{ order.quantity }}</td>
+                            <td>₺{{ order.total_price }}</td>
+                            <td>
+                                <form action="{% url 'delete_order' order.id %}" method="POST" id="deleteOrderForm">
+                                    {% csrf_token %}
+                                    <input type="submit" class="btn btn-danger btn-sm" value="x">
+                                </form>                    
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div class="col-md-4 offset-md-8">
             <div class="card" style="border: 1px solid #ccc; padding: 10px;">
@@ -48,7 +46,7 @@
                 <table class="table">
                     <tbody>
                         <tr>
-                            <td><strong>Ürünün Toplam Fiyatı:</strong></td>
+                            <td><strong>Ürünlerin Toplam Fiyatı:</strong></td>
                             <td>₺{{ total_price_sum }}</td>
                         </tr>
                         <tr>
