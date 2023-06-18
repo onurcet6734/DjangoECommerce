@@ -90,7 +90,7 @@ def product_detail(request, product_id):
 def checkout(request):
     if request.method == 'POST':
         order = Order.objects.filter(user=request.user).latest('created_at')
-        customer = get_object_or_404(Customer, user=request.user)  # Kullanıcıya ait müşteriyi alır
+        customer = get_object_or_404(Customer, user=request.user)  # Customer informartion
         total_price_sum = request.POST.get('total_price_sum', 0)
         address = Address(
             customer=customer,
@@ -102,8 +102,8 @@ def checkout(request):
             postal_code=request.POST['postal_code']
         )
         address.save()
-        return redirect('payment')  # Ödeme sayfasına yönlendirme yapabilirsiniz
-
+        return redirect('payment')  # Payment Page
+    
     order = Order.objects.filter(user=request.user).latest('created_at')
     total_price_sum = Order.objects.filter(user=request.user).aggregate(Sum('total_price'))['total_price__sum']
 
