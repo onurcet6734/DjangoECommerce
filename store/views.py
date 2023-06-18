@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Category, Product, Order, Customer
+from .models import Category, Product, Order, Customer, Address
 from django.http import JsonResponse
 from django.db.models import Sum
 from .utils import set_customer_cookie, get_customer_from_cookie, delete_customer_cookie
@@ -13,12 +13,12 @@ def index(request):
     if category_id:
         products = products.filter(category_id=category_id)
 
-    total_item_count = Order.objects.filter(user=request.user).count()  # Number or added products have been calculated
+    total_item_count = Order.objects.filter(user=request.user).count()
 
     context = {
         'products': products,
         'categories': categories,
-        'total_item_count': total_item_count  # total_item_count has been included on context
+        'total_item_count': total_item_count
     }
     return render(request, "index.html", context)
 
@@ -26,7 +26,7 @@ def index(request):
 def cart(request):
     orders = Order.objects.filter(user=request.user)
     total_price_sum = Order.objects.filter(user=request.user).aggregate(Sum('total_price'))['total_price__sum']
-    total_item_count = orders.count()  # Total order of the cart
+    total_item_count = orders.count()
 
     context = {
         'orders': orders,
@@ -37,14 +37,12 @@ def cart(request):
     return render(request, "cart.html", context)
 
 
-
 def add_to_cart(request, product_id):
     product = Product.objects.get(pk=product_id)
 
     if request.method == 'POST':
-        quantity = request.POST.get('quantity', '1')  # default values is '1'
+        quantity = request.POST.get('quantity', '1')
 
-        # Create an Order instance and save it to the database
         order = Order(
             user=request.user,
             product=product,
@@ -87,3 +85,30 @@ def product_detail(request, product_id):
     total_item_count = Order.objects.filter(user=request.user).count()
 
     return render(request, 'detail.html', {'product': product, 'total_item_count': total_item_count,  'categories': Category.objects.all()})
+
+
+def checkout(request):
+    if request.method == 'POST':
+        order = Order.objects.filter(user=request.user).latest('created_at')
+        customer = get_object_or_404(Customer, user=request.user)  # Kullanıcıya ait müşteriyi alır
+        total_price_sum = request.POST.get('total_price_sum', 0)
+        address = Address(
+            customer=customer,
+            order=order,
+            address_line1=request.POST['address_line1'],
+            address_line2=request.POST['address_line2'],
+            city=request.POST['city'],
+            state=request.POST['state'],
+            postal_code=request.POST['postal_code']
+        )
+        address.save()
+        return redirect('payment')  # Ödeme sayfasına yönlendirme yapabilirsiniz
+
+    order = Order.objects.filter(user=request.user).latest('created_at')
+    total_price_sum = Order.objects.filter(user=request.user).aggregate(Sum('total_price'))['total_price__sum']
+
+    context = {
+        'order': order,
+        'total_price_sum': total_price_sum,
+    }
+    return render(request, 'address_form.html', context)
