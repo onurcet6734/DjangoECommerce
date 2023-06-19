@@ -108,6 +108,8 @@ def product_detail(request, product_id):
     return render(request, 'detail.html', {'product': product, 'total_item_count': total_item_count, 'categories': Category.objects.all()})
 
 
+
+
 def checkout(request):
     if not Order.objects.filter(customer__user=request.user).exists():
         return redirect('index')
