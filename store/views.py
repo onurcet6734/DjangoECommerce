@@ -3,7 +3,7 @@ from .models import Category, Product, Order, Customer, Address
 from django.http import JsonResponse
 from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
-# from .utils import set_customer_cookie, get_customer_from_cookie, delete_customer_cookie
+from .utils import set_customer_cookie, get_customer_from_cookie, delete_customer_cookie
 
 def index(request):
     products = Product.objects.all()
@@ -27,6 +27,10 @@ def index(request):
         'total_item_count': total_item_count
     }
     return render(request, "index.html", context)
+
+
+def handledLogin(request):
+    return render(request,"login.html")
 
 def cart(request):
     orders = Order.objects.filter(customer__user=request.user)
@@ -108,33 +112,38 @@ def product_detail(request, product_id):
     return render(request, 'detail.html', {'product': product, 'total_item_count': total_item_count, 'categories': Category.objects.all()})
 
 
-
-
+@login_required
 def checkout(request):
-    if not Order.objects.filter(customer__user=request.user).exists():
+    customer = get_object_or_404(Customer, user=request.user)
+    orders = Order.objects.filter(customer=customer)
+
+    if not orders.exists():
         return redirect('index')
 
     if request.method == 'POST':
-        order = Order.objects.filter(customer__user=request.user).latest('created_at')
-        customer = get_object_or_404(Customer, user=request.user)  # Customer information
+        order = orders.latest('created_at')
         total_price_sum = request.POST.get('total_price_sum', 0)
         address = Address(
             customer=customer,
             order=order,
-            address_line1=request.POST['address_line1'],
-            address_line2=request.POST['address_line2'],
-            city=request.POST['city'],
-            state=request.POST['state'],
-            postal_code=request.POST['postal_code']
+            address_line1=request.POST.get('address_line1', ''),
+            address_line2=request.POST.get('address_line2', ''),
+            city=request.POST.get('city', ''),
+            state=request.POST.get('state', ''),
+            postal_code=request.POST.get('postal_code', '')
         )
         address.save()
-        return redirect('payment')  # Payment Page
+        # return redirect('payment')  # Redirect to the payment page
 
-    order = Order.objects.filter(customer__user=request.user).latest('created_at')
-    total_price_sum = Order.objects.filter(customer__user=request.user).aggregate(Sum('total_price'))['total_price__sum']
+    total_item_count = orders.count()
 
     context = {
-        'order': order,
-        'total_price_sum': total_price_sum,
+        'total_item_count': total_item_count,
+        'total_price_sum': orders.aggregate(Sum('total_price'))['total_price__sum'],
+        'categories': Category.objects.all(),
     }
-    return render(request, 'address_form.html', context)
+
+    if get_customer_from_cookie(request):  # Check if customer cookie exists
+        return render(request, 'address_form.html', context)
+    else:
+        return render(request, 'login.html')
