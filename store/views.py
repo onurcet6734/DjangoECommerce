@@ -3,6 +3,7 @@ from .models import Category, Product, Order, Customer, Address
 from django.http import JsonResponse
 from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
 from .utils import set_customer_cookie, get_customer_from_cookie, delete_customer_cookie
 
 def index(request):
@@ -31,7 +32,26 @@ def index(request):
 
 
 def handledLogin(request):
-    return render(request, "login.html")
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            try:
+                customer = Customer.objects.get(user=user)
+                response = redirect('index')
+                set_customer_cookie(response, customer)  # Save customer information in cookie
+                return response
+            except Customer.DoesNotExist:
+                pass
+            return redirect('index')
+        else:
+            return render(request, 'login.html', {'message': 'Invalid username or password'})
+
+    return render(request, 'login.html')
 
 
 def cart(request):
