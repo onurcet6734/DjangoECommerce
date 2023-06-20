@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .utils import set_customer_cookie, get_customer_from_cookie, delete_customer_cookie
 
 def index(request):
-    products = Product.objects.all()
+    products = Product.objects.select_related('category').all()
     categories = Category.objects.all()
 
     category_id = request.GET.get('category_id')
@@ -16,7 +16,7 @@ def index(request):
     total_item_count = 0
     if request.user.is_authenticated:
         try:
-            customer = Customer.objects.get(user=request.user)
+            customer = Customer.objects.select_related('user').get(user=request.user)
             total_item_count = Order.objects.filter(customer=customer).count()
         except Customer.DoesNotExist:
             pass
@@ -29,11 +29,13 @@ def index(request):
     return render(request, "index.html", context)
 
 
+
 def handledLogin(request):
-    return render(request,"login.html")
+    return render(request, "login.html")
+
 
 def cart(request):
-    orders = Order.objects.filter(customer__user=request.user)
+    orders = Order.objects.filter(customer__user=request.user).prefetch_related('product')
     total_price_sum = orders.aggregate(Sum('total_price'))['total_price__sum']
     total_item_count = orders.count()
     cargo_price = 20
@@ -92,7 +94,7 @@ def product_detail(request, product_id):
         quantity = int(request.POST.get('quantity', 1))
 
         try:
-            order = Order.objects.get(customer=customer, product=product)
+            order = Order.objects.select_related('customer', 'product').get(customer=customer, product=product)
             order.quantity += quantity
             order.total_price = product.price * order.quantity
             order.save()
@@ -111,11 +113,10 @@ def product_detail(request, product_id):
 
     return render(request, 'detail.html', {'product': product, 'total_item_count': total_item_count, 'categories': Category.objects.all()})
 
-
 @login_required
 def checkout(request):
     customer = get_object_or_404(Customer, user=request.user)
-    orders = Order.objects.filter(customer=customer)
+    orders = Order.objects.filter(customer=customer).prefetch_related('product')
 
     if not orders.exists():
         return redirect('index')
