@@ -14,6 +14,10 @@ def index(request):
     if category_id:
         products = products.filter(category_id=category_id)
 
+    search_query = request.GET.get('q')
+    if search_query:
+        products = products.filter(title__icontains=search_query)
+
     total_item_count = 0
     if request.user.is_authenticated:
         try:
@@ -25,9 +29,11 @@ def index(request):
     context = {
         'products': products,
         'categories': categories,
-        'total_item_count': total_item_count
+        'total_item_count': total_item_count,
+        'search_query': search_query
     }
     return render(request, "index.html", context)
+
 
 
 
