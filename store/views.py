@@ -5,6 +5,22 @@ from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from .utils import set_customer_cookie, get_customer_from_cookie, delete_customer_cookie
+from rest_framework import generics, permissions
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from .serializers import ProductSerializer
+import json
+
+# TO NOTICE TYPE OF DATAS IS JSON, YOU CAN ACTIVE THIS METHOD , THEN YOU NEED TO DEACTIVE SAME NAMED METHOD
+
+# @api_view(['GET'])
+# def index(request):
+#     products = Product.objects.select_related('category').all()
+
+#     serializer = ProductSerializer(products, many=True, context={'request': request})  
+#     serialized_products = serializer.data
+
+#     return Response(serialized_products)
 
 def index(request):
     products = Product.objects.select_related('category').all()
@@ -26,12 +42,18 @@ def index(request):
         except Customer.DoesNotExist:
             pass
 
+    serializer = ProductSerializer(products, many=True, context={'request': request})  
+    serialized_products = serializer.data
+
     context = {
-        'products': products,
+        'products': serialized_products,
         'categories': categories,
         'total_item_count': total_item_count,
         'search_query': search_query
     }
+    
+    json_data = json.dumps(serialized_products)
+    print(json_data)
     return render(request, "index.html", context)
 
 
