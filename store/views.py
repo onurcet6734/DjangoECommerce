@@ -11,12 +11,11 @@ from rest_framework.response import Response
 from .serializers import ProductSerializer
 import json
 
-# TO NOTICE TYPE OF DATAS IS JSON, YOU CAN ACTIVE THIS METHOD , THEN YOU NEED TO DEACTIVE SAME NAMED METHOD
+# TO NOTICE TYPE OF DATAS IS JSON, I WROTE indexApi METHOD
 
 # @api_view(['GET'])
-# def index(request):
+# def indexApi(request):
 #     products = Product.objects.select_related('category').all()
-
 #     serializer = ProductSerializer(products, many=True, context={'request': request})  
 #     serialized_products = serializer.data
 
