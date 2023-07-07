@@ -10,6 +10,9 @@ urlpatterns = [
     path('delete_order/<int:order_id>/', views.delete_order, name='delete_order'),
     path('address-form/', views.checkout, name='checkout'),
     path('login/', views.handledLogin, name='handledLogin'),
+    path('payment_checkout/', views.payment_checkout, name='payment_checkout'),
+
+
 
 
 

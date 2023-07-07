@@ -9,7 +9,7 @@
     <div class="row">
         <div class="col-md-6 offset-md-3">
             <h2>Adres Bilgileri</h2>
-            <form method="POST">
+            <form action="{% url 'payment_checkout' %}" method="POST">
                 {% csrf_token %}
                 <table class="table">
                     <tbody>
@@ -40,7 +40,7 @@
                     <input type="text" class="form-control" id="id_postal_code" name="postal_code" value="{{ request.POST.postal_code }}">
                 </div>
                 <input type="hidden" name="total_price_sum" value="{{ total_price_sum }}">
-                <button type="submit" class="btn btn-primary">Gönder</button>
+                <button type="submit" class="btn btn-primary">Siparişi Onayla</button>
             </form>
         </div>
     </div>

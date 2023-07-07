@@ -10,6 +10,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from .serializers import ProductSerializer
 import json
+from django.urls import reverse
+from django.conf import settings
+import stripe
 
 # TO NOTICE TYPE OF DATAS IS JSON, I WROTE indexApi METHOD
 
@@ -195,3 +198,25 @@ def checkout(request):
         return render(request, 'address_form.html', context)
     else:
         return render(request, 'login.html')
+    
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+@login_required
+def payment_checkout(request):
+    checkout_session = stripe.checkout.Session.create(
+        payment_method_types=[
+            'card',
+        ],
+        line_items=[
+            {
+                'price': 'price_1NRMgrDGClv24mi8EMjZuTe7',
+                'quantity': 1,
+            },
+        ],
+        mode='payment',
+        success_url='http://127.0.0.1:5555/',
+        cancel_url='http://127.0.0.1:5555/',
+    )
+
+    return redirect(checkout_session.url, code=303)
