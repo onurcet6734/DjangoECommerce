@@ -37,6 +37,7 @@ def index(request):
         products = products.filter(title__icontains=search_query)
 
     total_item_count = 0
+    customer_from_cookie = get_customer_from_cookie(request)  # Customer from cookie
     if request.user.is_authenticated:
         try:
             customer = Customer.objects.select_related('user').get(user=request.user)
@@ -51,13 +52,13 @@ def index(request):
         'products': serialized_products,
         'categories': categories,
         'total_item_count': total_item_count,
-        'search_query': search_query
+        'search_query': search_query,
+        'customer_from_cookie': customer_from_cookie  # Add customer_from_cookie to the context
     }
     
     json_data = json.dumps(serialized_products)
     print(json_data)
     return render(request, "index.html", context)
-
 
 
 

@@ -38,9 +38,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/">Ana Sayfa</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Ürünler</a>
-                    </li>
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="kategoriDropdown" role="button"
                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -54,9 +52,7 @@
 
                           
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">İletişim</a>
-                    </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'cart' %}">
                             <i class="fa fa-shopping-cart" style="margin-right: 5px;"></i> Sepetim 
@@ -67,7 +63,21 @@
                             {% endif %}
                         </a>
                     </li>
+
                     
+                    <li class="nav-item">
+                        {% if customer_from_cookie %}
+                            <a class="nav-link" href="#">
+                                <i style="margin-right: 5px;"></i>{{ request.user.username }}
+                            </a>
+                        {% else %}
+                            <a class="nav-link" href="{% url 'handledLogin' %}">
+                                <i style="margin-right: 5px;"></i> Giriş Yap
+                            </a>
+                        {% endif %}
+                    </li>
+
+
                 </ul>
             </div>
         </div>
