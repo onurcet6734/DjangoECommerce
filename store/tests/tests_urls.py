@@ -25,3 +25,4 @@ class UrlsTest(TestCase):
     def test_payment_checkout_url(self):
         url = reverse('payment_checkout')
         self.assertEqual(resolve(url).func, payment_checkout)
+
