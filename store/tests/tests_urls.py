@@ -25,15 +25,3 @@ class UrlsTest(TestCase):
     def test_payment_checkout_url(self):
         url = reverse('payment_checkout')
         self.assertEqual(resolve(url).func, payment_checkout)
-
-    # def test_product_detail_url(self):
-    #     url = reverse('detail', args=[1])  # Burada 1 yerine mevcut bir ürün ID'si kullanabilirsiniz
-    #     self.assertEqual(resolve(url).func, product_detail)    
-
-    # def test_add_to_cart_url(self):
-    #     url = reverse('add_to_cart', args=[1])  # Burada 1 yerine mevcut bir ürün ID'si kullanabilirsiniz
-    #     self.assertEqual(resolve(url).func, add_to_cart)
-
-    # def test_delete_order_url(self):
-    #     url = reverse('delete_order', args=[1])  # Burada 1 yerine mevcut bir sipariş ID'si kullanabilirsiniz
-    #     self.assertEqual(resolve(url).func, delete_order)
