@@ -12,7 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['id', 'name']
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -25,6 +25,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
+    category = CategorySerializer()
 
     def get_image(self, obj):
         if obj.image:
@@ -36,9 +37,10 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'price', 'description', 'created_at', 'category', 'image']
 
 
-
-
 class OrderSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+    customer = CustomerSerializer()
+
     class Meta:
         model = Order
         fields = '__all__'
