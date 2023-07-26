@@ -9,19 +9,19 @@ from .serializers import ProductSerializer
 import json
 from django.conf import settings
 import stripe
-from django.views import View
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from django.utils.decorators import method_decorator
 
 
-class IndexApiView(View):
+class IndexApiView(APIView):
     def get(self, request):
         products = Product.objects.select_related('category').all()
         serializer = ProductSerializer(products, many=True, context={'request': request})
-        serialized_products = serializer.data
-        return JsonResponse(serialized_products, safe=False)
+        return Response(serializer.data)
 
 
-class IndexView(View):
+class IndexView(APIView):
     def get(self, request):
         products = Product.objects.select_related('category').all()
         categories = Category.objects.all()
@@ -63,7 +63,7 @@ class IndexView(View):
         return super().dispatch(*args, **kwargs)
 
 
-class HandledLoginView(View):
+class HandledLoginView(APIView):
     def post(self, request):
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -87,7 +87,7 @@ class HandledLoginView(View):
         return render(request, 'login.html')
 
 
-class CartView(View):
+class CartView(APIView):
     @method_decorator(login_required)
     def get(self, request):
         orders = Order.objects.filter(customer__user=request.user).prefetch_related('product')
@@ -109,7 +109,7 @@ class CartView(View):
         return render(request, "cart.html", context)
 
 
-class AddToCartView(View):
+class AddToCartView(APIView):
     def post(self, request, product_id):
         product = get_object_or_404(Product, pk=product_id)
 
@@ -135,13 +135,13 @@ class AddToCartView(View):
         return redirect('index')
 
 
-def delete_order(request, order_id):
+def delete_order(request,order_id):
     order = get_object_or_404(Order, id=order_id)
     order.delete()
     return redirect('cart')
 
 
-class ProductDetailView(View):
+class ProductDetailView(APIView):
     @method_decorator(login_required)
     def get(self, request, product_id):
         product = get_object_or_404(Product, id=product_id)
@@ -176,7 +176,7 @@ class ProductDetailView(View):
             return redirect('cart')
 
 
-class CheckoutView(View):
+class CheckoutView(APIView):
     @method_decorator(login_required)
     def get(self, request):
         customer = get_object_or_404(Customer, user=request.user)
