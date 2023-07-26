@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Category, Product, Order, Customer, Address
 from django.http import JsonResponse
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from .utils import set_customer_cookie, get_customer_from_cookie, delete_customer_cookie
@@ -32,7 +32,7 @@ class IndexView(APIView):
 
         search_query = request.GET.get('q')
         if search_query:
-            products = products.filter(title__icontains=search_query)
+            products = products.filter(Q(title__icontains=search_query) | Q(description__icontains=search_query))
 
         total_item_count = 0
         customer_from_cookie = get_customer_from_cookie(request)
