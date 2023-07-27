@@ -144,17 +144,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  
 SESSION_SAVE_EVERY_REQUEST = True 
 
-# # Name of cookie
-# SESSION_COOKIE_NAME = 'customer_info'
 
-# # Duration of Cookie (second type)
-# SESSION_COOKIE_AGE = 3600  # Örneğin 1 saat
-
-# # Whether the cookie should be transmitted over HTTPS
-# SESSION_COOKIE_SECURE = True
-
-# # Http path of cookie
-# SESSION_COOKIE_PATH = '/'
 
 STRIPE_PUBLIC_KEY = 'pk_test_51NREc2DGClv24mi8DQuFMCempUmRBkZNqDWpqXVskA5XZOBAP6bhQY11NOFd2SMt5wZURNntJraXlVItIMkvHor400GEMwO6we'
 STRIPE_SECRET_KEY = 'sk_test_51NREc2DGClv24mi8I0R2ErqqEAFECVhvlACWqG3KJ78FEBGQg96I7RYUyUkts7f39YR6sOwCYvBZ9iOo4NyNi55k00Fp7Rjo0F'

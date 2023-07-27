@@ -18,7 +18,7 @@ class ViewsTest(TestCase):
 
     def test_handled_login_view(self):
         response = self.client.post(reverse('handled_login'), {'username': 'testuser', 'password': 'testpassword'})
-        self.assertEqual(response.status_code, 302)  # Redirect status code
+        self.assertEqual(response.status_code, 302)  
         self.assertRedirects(response, reverse('index'))
 
     def test_cart_view(self):
@@ -51,5 +51,5 @@ class ViewsTest(TestCase):
         self.client.login(username='testuser', password='testpassword')
         response = self.client.get(reverse('checkout'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'login.html')  # Assuming the user is not authenticated
+        self.assertTemplateUsed(response, 'login.html')  
 
