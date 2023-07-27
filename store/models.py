@@ -67,3 +67,9 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment for Order #{self.order.pk}"
+
+class Comment(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    comment = models.TextField(max_length=300, blank=True)
+
