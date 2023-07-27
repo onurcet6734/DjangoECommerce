@@ -22,7 +22,7 @@
                     <tbody>
                         {% for order in orders %}
                         <tr>
-                            <td><img src="{{ order.product.image.url }}" alt="{{ order.product.title }}" width="100" height="100"></td>
+                            <td><img src="{{ order.product.image }}" alt="{{ order.product.title }}" width="100" height="100"></td>
                             <td>{{ order.product.title }}</td>
                             <td>₺{{ order.product.price }}</td>
                             <td>{{ order.quantity }}</td>

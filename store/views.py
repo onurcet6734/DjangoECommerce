@@ -98,11 +98,11 @@ class CartView(APIView):
         if total_price_sum and total_price_sum > 5000:
             cargo_price = 0
 
-        order_serializer = OrderSerializer(orders, many=True)
+        order_serializer = OrderSerializer(orders, many=True, context={'request': request})
         category_serializer = CategorySerializer(Category.objects.all(), many=True)
 
         context = {
-            'orders': orders,
+            'orders': order_serializer.data,
             'total_price_sum': total_price_sum,
             'total_item_count': total_item_count,
             'categories': category_serializer.data,
