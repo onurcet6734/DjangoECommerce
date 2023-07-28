@@ -130,7 +130,7 @@ class AddToCartView(APIView):
                     )
                     order.save()
 
-                    # ProductSerializer ve CustomerSerializer'ı context ile kullanın
+                   
                     product_serializer = ProductSerializer(product, context={'request': request})
                     customer_serializer = CustomerSerializer(customer)
 
