@@ -5,7 +5,7 @@ from django.db.models import Sum, Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from .utils import set_customer_cookie, get_customer_from_cookie, delete_customer_cookie
-from .serializers import ProductSerializer, OrderSerializer, CustomerSerializer, CategorySerializer
+from store.api.serializers import ProductSerializer, OrderSerializer, CustomerSerializer, CategorySerializer
 import json
 from django.conf import settings
 import stripe
@@ -14,11 +14,6 @@ from rest_framework.response import Response
 from django.utils.decorators import method_decorator
 
 
-class IndexApiView(APIView):
-    def get(self, request):
-        products = Product.objects.select_related('category').all()
-        serializer = ProductSerializer(products, many=True, context={'request': request})
-        return Response(serializer.data)
 
 
 class IndexView(APIView):
