@@ -1,6 +1,7 @@
 from django.urls import path
-from . import views
+from store.api.views import (ProductListAPIView,)
 
 urlpatterns = [
-    path('indexAPI/', views.IndexApiView.as_view()),
+    path('api/product/list/', ProductListAPIView.as_view()),
+
 ]
