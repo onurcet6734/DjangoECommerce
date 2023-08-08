@@ -24,7 +24,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
+    image = serializers.ImageField()
     category = CategorySerializer()
 
     def get_image(self, obj):
@@ -42,11 +42,17 @@ class ProductSerializer(serializers.ModelSerializer):
             category, created = Category.objects.get_or_create(**category_data)
             instance.category = category
         
-        # KALAN ALANLARIN GÜNCELLEME İŞLEMLERİ
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
         return instance
+    
+    def create(self, validated_data):
+        category_data = validated_data.pop('category')
+        category, created = Category.objects.get_or_create(**category_data)
+        
+        product = Product.objects.create(category=category, **validated_data)
+        return product
 
 
 class OrderSerializer(serializers.ModelSerializer):
