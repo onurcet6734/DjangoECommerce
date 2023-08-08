@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from store.models import Category, Customer, Product, Order, Address, Payment
+from store.models import  Category, Customer, Product, Order, Address, Payment
 from django.contrib.auth.models import User
 
 
@@ -35,6 +35,18 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = "__all__"
+    
+    def update(self, instance, validated_data):
+        category_data = validated_data.pop('category', None)
+        if category_data:
+            category, created = Category.objects.get_or_create(**category_data)
+            instance.category = category
+        
+        # KALAN ALANLARIN GÜNCELLEME İŞLEMLERİ
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
 
 
 class OrderSerializer(serializers.ModelSerializer):
