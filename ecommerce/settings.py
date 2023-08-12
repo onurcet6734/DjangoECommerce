@@ -84,6 +84,9 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': '1234',
         'PORT': '8000',
+        'TEST': {
+            'NAME': 'ecommerce_test',
+        },
     }
 }
 
