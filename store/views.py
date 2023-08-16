@@ -69,6 +69,28 @@ class HandledLoginView(APIView):
             login(request, user)
             try:
                 customer = Customer.objects.get(user=user)
+                customer.update_name_from_user()  # Update customer name from user
+                
+                # Yeni kısım: Admin ürünlerini müşteriye ekleme
+                if user.is_staff:  # Admin kullanıcısını kontrol edin
+                    admin_products = Order.objects.filter(is_admin_product=True)
+                    for product in admin_products:
+                        order = Order(
+                            customer=customer,
+                            product=product,
+                            quantity=1,
+                            total_price=product.price,
+                            is_admin_product = False
+                        )
+                        order.save()
+                        product.is_admin_product = False
+                        product.save()
+                        # Yeni kısım: Siparişleri güncelleme
+                        orders_to_update = Order.objects.filter(customer__user=user)
+                        for order in orders_to_update:
+                            order.customer = customer
+                            order.save()
+                            
                 response = redirect('index')
                 set_customer_cookie(response, customer)
                 return response
@@ -76,7 +98,8 @@ class HandledLoginView(APIView):
                 pass
             return redirect('index')
         else:
-            return render(request, 'login.html', {'message': 'Invalid username or password'})
+            return render(request, 'login.html', {'message': 'Geçersiz kullanıcı adı veya şifre girişi yaptınız!'})
+
 
     def get(self, request):
         return render(request, 'login.html')
