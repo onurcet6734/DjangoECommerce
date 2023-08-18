@@ -32,12 +32,12 @@ class IndexView(APIView):
         total_item_count = 0
         customer_from_cookie = get_customer_from_cookie(request)
         
-        custs = Customer.objects.filter(name = customer_from_cookie).values_list('id', flat=True)
-        print(custs)
+        custId = Customer.objects.filter(name = customer_from_cookie).values_list('id', flat=True)
+        print(custsId)
         adminOrders = Order.objects.filter(is_admin_product = True)
         print(adminOrders)
         if customer_from_cookie!=None:
-            adminOrders.update(is_admin_product=False, customer = custs)
+            adminOrders.update(is_admin_product=False, customer = custId)
 
     
         if request.user.is_authenticated:
