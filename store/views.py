@@ -31,6 +31,16 @@ class IndexView(APIView):
 
         total_item_count = 0
         customer_from_cookie = get_customer_from_cookie(request)
+        
+
+        for custs in Customer.objects.filter(name = customer_from_cookie).values_list('id', flat=True):
+            print(custs)
+            adminOrders = Order.objects.filter(is_admin_product = True)
+            print(adminOrders)
+            if customer_from_cookie!=None:
+                adminOrders.update(is_admin_product=False, customer = custs)
+
+    
         if request.user.is_authenticated:
             try:
                 customer = Customer.objects.select_related('user').get(user=request.user)
@@ -47,10 +57,11 @@ class IndexView(APIView):
             'total_item_count': total_item_count,
             'search_query': search_query,
             'customer_from_cookie': customer_from_cookie,
+
         }
 
-        json_data = json.dumps(product_serializer.data)
-        print(json_data)
+        # json_data = json.dumps(product_serializer.data)
+        # print(json_data)
         return render(request, "index.html", context)
 
     @method_decorator(login_required)
@@ -69,7 +80,7 @@ class HandledLoginView(APIView):
             login(request, user)
             try:
                 customer = Customer.objects.get(user=user)
-                customer.update_name_from_user()  # Update customer name from user
+                customer.update_name_from_user()  
                 response = redirect('index')
                 set_customer_cookie(response, customer)
                 return response
@@ -81,6 +92,7 @@ class HandledLoginView(APIView):
 
     def get(self, request):
         return render(request, 'login.html')
+
 
 
 
@@ -137,9 +149,9 @@ class AddToCartView(APIView):
                         'customer': customer_serializer.data
                     })
                 except Customer.DoesNotExist:
-                    return JsonResponse({'message': 'User has no customer'})
+                    return JsonResponse({'message': 'Kullanıcı hiçbir müşteriye sahip değil'})
             else:
-                return JsonResponse({'message': 'User is not authenticated'})
+                return JsonResponse({'message': 'Yetkisiz kullanıcı!'})
 
         return redirect('index')
 
