@@ -282,7 +282,6 @@ def payment_checkout(request):
 
 #STOKTAN DUSME 
 def success_view(request):
-    
     addresses = Address.objects.all().select_related('order') 
     for address in addresses:
         quantity = address.order.product.stock
