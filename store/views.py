@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Category, Product, Order, Customer, Address
 from django.http import JsonResponse
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Count
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from .utils import set_customer_cookie, get_customer_from_cookie, delete_customer_cookie
@@ -228,34 +228,16 @@ class CheckoutView(APIView):
     def post(self, request):
         customer = get_object_or_404(Customer, user=request.user)
         orders = Order.objects.filter(customer=customer).prefetch_related('product')
-
         if not orders.exists():
             return redirect('index')
-
-        order = orders.latest('created_at')
         total_price_sum = orders.aggregate(Sum('total_price'))['total_price__sum']
-        address = Address(
-            customer=customer,
-            order=order,
-            address_line1=request.POST.get('address_line1', ''),
-            address_line2=request.POST.get('address_line2', ''),
-            city=request.POST.get('city', ''),
-            state=request.POST.get('state', ''),
-            postal_code=request.POST.get('postal_code', '')
-        )
-        address.save()
         total_item_count = orders.count()
-
         category_serializer = CategorySerializer(Category.objects.all(), many=True)
-
-
         context = {
             'total_item_count': total_item_count,
             'total_price_sum': total_price_sum,
             'categories': category_serializer.data,
-
         }
-
         if get_customer_from_cookie(request):
             return render(request, 'address_form.html', context)
         else:
@@ -265,6 +247,28 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @login_required
 def payment_checkout(request):
+    customer = get_object_or_404(Customer, user=request.user)
+    orders = Order.objects.filter(customer=customer).prefetch_related('product')
+
+    order = orders.latest('created_at')
+        
+    address_line1 = request.POST.get('address_line1')
+    address_line2 = request.POST.get('address_line2')
+    city = request.POST.get('city')
+    state = request.POST.get('state')
+    postal_code = request.POST.get('postal_code')
+
+    address = Address(
+        customer=customer,
+        order=order,
+        address_line1=address_line1,
+        address_line2=address_line2,
+        city=city,
+        state=state,
+        postal_code=postal_code
+    )
+    address.save()
+
     checkout_session = stripe.checkout.Session.create(
         payment_method_types=[
             'card',
@@ -276,8 +280,25 @@ def payment_checkout(request):
             },
         ],
         mode='payment',
-        success_url='http://127.0.0.1:5555/',
+        success_url='http://127.0.0.1:5555/success',
         cancel_url='http://127.0.0.1:5555/',
     )
 
     return redirect(checkout_session.url, code=303)
+
+#STOKTAN DUSME 
+def success_view(request):
+    if request.method =="POST":
+        addresses = Address.objects.all().select_related('order') 
+        for address in addresses:
+            quantity = address.order.product.stock
+
+            print(address.order.quantity)
+            print(address.order.product.id)
+            print(quantity)
+
+            product = Product.objects.get(id=address.order.product.id)
+            product.stock = quantity - address.order.quantity
+            product.save()
+
+    return render(request, 'success.html')

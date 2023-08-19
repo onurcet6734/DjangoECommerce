@@ -14,7 +14,7 @@
                 <p>{{ product.description }}</p>
                 <p>Fiyat: ₺{{ product.price }}</p>
                 <p>Ürün Kategorisi: {{ product.category.name}}</p>
-                <p>Stok Sayısı:</p>
+                <p>Stok Sayısı:{{ product.stock }}</p>
             
                 <form method="POST" action="{% url 'detail' product_id=product.id %}">
                     {% csrf_token %}

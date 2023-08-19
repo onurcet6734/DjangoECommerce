@@ -10,4 +10,6 @@ urlpatterns = [
     path('address-form/', views.CheckoutView.as_view(), name='checkout'),
     path('login/', views.HandledLoginView.as_view(), name='handledLogin'),
     path('payment_checkout/', views.payment_checkout, name='payment_checkout'),
+    path('success/', views.success_view, name='success_view'),
+
 ]
