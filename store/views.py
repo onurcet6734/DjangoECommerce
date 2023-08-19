@@ -1,16 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Category, Product, Order, Customer, Address
 from django.http import JsonResponse
-from django.db.models import Sum, Q, Count
+from django.db.models import Sum, Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from .utils import set_customer_cookie, get_customer_from_cookie, delete_customer_cookie
 from store.api.serializers import ProductSerializer, OrderSerializer, CustomerSerializer, CategorySerializer
-import json
 from django.conf import settings
 import stripe
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from django.utils.decorators import method_decorator
 
 
@@ -36,7 +34,7 @@ class IndexView(APIView):
         if customer_from_cookie!=None:
             adminOrders.update(is_admin_product=False, customer = custnumberid)
 
-    
+
         if request.user.is_authenticated:
             try:
                 customer = Customer.objects.select_related('user').get(user=request.user)
@@ -88,8 +86,6 @@ class HandledLoginView(APIView):
 
     def get(self, request):
         return render(request, 'login.html')
-
-
 
 
 class CartView(APIView):
@@ -163,7 +159,6 @@ class ProductDetailView(APIView):
     def get(self, request, product_id):
         product = get_object_or_404(Product, id=product_id)
         customer, created = Customer.objects.get_or_create(user=request.user)
-
         total_item_count = Order.objects.filter(customer=customer).count()
 
         product_serializer = ProductSerializer(product, context={'request': request})
@@ -242,6 +237,7 @@ class CheckoutView(APIView):
             return render(request, 'login.html')
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
 
 @login_required
 def payment_checkout(request):
