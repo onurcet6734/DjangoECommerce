@@ -14,8 +14,6 @@ from rest_framework.response import Response
 from django.utils.decorators import method_decorator
 
 
-
-
 class IndexView(APIView):
     def get(self, request):
         products = Product.objects.select_related('category').all()
