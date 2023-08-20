@@ -263,6 +263,19 @@ def payment_checkout(request):
     )
     address.save()
 
+    addresses = Address.objects.all().select_related('order') 
+    for address in addresses:
+        quantity = address.order.product.stock
+
+        print(address.order.quantity)
+        print(address.order.product.id)
+        print(quantity)
+
+        product = Product.objects.get(id=address.order.product.id)
+        product.stock = quantity - address.order.quantity
+        product.save()
+        
+
     checkout_session = stripe.checkout.Session.create(
         payment_method_types=[
             'card',
@@ -282,16 +295,5 @@ def payment_checkout(request):
 
 #STOKTAN DUSME 
 def success_view(request):
-    addresses = Address.objects.all().select_related('order') 
-    for address in addresses:
-        quantity = address.order.product.stock
-
-        print(address.order.quantity)
-        print(address.order.product.id)
-        print(quantity)
-
-        product = Product.objects.get(id=address.order.product.id)
-        product.stock = quantity - address.order.quantity
-        product.save()
 
     return render(request, 'success.html')
