@@ -11,7 +11,6 @@ import stripe
 from rest_framework.views import APIView
 from django.utils.decorators import method_decorator
 
-
 class IndexView(APIView):
     def get(self, request):
         products = Product.objects.select_related('category').all()
@@ -34,7 +33,6 @@ class IndexView(APIView):
         if customer_from_cookie!=None:
             adminOrders.update(is_admin_product=False, customer = custnumberid)
 
-
         if request.user.is_authenticated:
             try:
                 customer = Customer.objects.select_related('user').get(user=request.user)
@@ -53,7 +51,6 @@ class IndexView(APIView):
             'customer_from_cookie': customer_from_cookie,
 
         }
-
         # json_data = json.dumps(product_serializer.data)
         # print(json_data)
         return render(request, "index.html", context)
@@ -61,7 +58,6 @@ class IndexView(APIView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
-
 
 class HandledLoginView(APIView):
     def post(self, request):
@@ -87,7 +83,6 @@ class HandledLoginView(APIView):
     def get(self, request):
         return render(request, 'login.html')
 
-
 class CartView(APIView):
     @method_decorator(login_required)
     def get(self, request):
@@ -112,7 +107,6 @@ class CartView(APIView):
 
         return render(request, "cart.html", context)
 
-
 class AddToCartView(APIView):
     def post(self, request, product_id):
         product = get_object_or_404(Product, pk=product_id)
@@ -131,7 +125,6 @@ class AddToCartView(APIView):
                     )
                     order.save()
 
-                   
                     product_serializer = ProductSerializer(product, context={'request': request})
                     customer_serializer = CustomerSerializer(customer)
 
@@ -147,12 +140,10 @@ class AddToCartView(APIView):
 
         return redirect('index')
 
-
 def delete_order(request,order_id):
     order = get_object_or_404(Order, id=order_id)
     order.delete()
     return redirect('cart')
-
 
 class ProductDetailView(APIView):
     @method_decorator(login_required)
@@ -173,7 +164,6 @@ class ProductDetailView(APIView):
 
         if request.method == 'POST':
             quantity = int(request.POST.get('quantity', 1))
-
             try:
                 order = Order.objects.select_related('customer', 'product').get(customer=customer, product=product)
                 order.quantity += quantity
@@ -187,9 +177,7 @@ class ProductDetailView(APIView):
                     total_price=product.price * quantity
                 )
                 order.save()
-
             return redirect('cart')
-
 
 class CheckoutView(APIView):
     @method_decorator(login_required)
@@ -237,10 +225,24 @@ class CheckoutView(APIView):
             return render(request, 'login.html')
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
-
+checkout_session = stripe.checkout.Session.create(
+        payment_method_types=[
+            'card',
+        ],
+        line_items=[
+            {
+                'price': 'price_1NRMgrDGClv24mi8EMjZuTe7',
+                'quantity': 1,
+            },
+        ],
+        mode='payment',
+        success_url='http://127.0.0.1:5555/success',
+        cancel_url='http://127.0.0.1:5555/',
+    )
 
 @login_required
 def payment_checkout(request):
+
     customer = get_object_or_404(Customer, user=request.user)
     orders = Order.objects.filter(customer=customer).prefetch_related('product')
 
@@ -263,37 +265,29 @@ def payment_checkout(request):
     )
     address.save()
 
-    addresses = Address.objects.all().select_related('order') 
-    for address in addresses:
-        quantity = address.order.product.stock
-
-        print(address.order.quantity)
-        print(address.order.product.id)
-        print(quantity)
-
-        product = Product.objects.get(id=address.order.product.id)
-        product.stock = quantity - address.order.quantity
-        product.save()
-        
-
-    checkout_session = stripe.checkout.Session.create(
-        payment_method_types=[
-            'card',
-        ],
-        line_items=[
-            {
-                'price': 'price_1NRMgrDGClv24mi8EMjZuTe7',
-                'quantity': 1,
-            },
-        ],
-        mode='payment',
-        success_url='http://127.0.0.1:5555/success',
-        cancel_url='http://127.0.0.1:5555/',
-    )
+    if checkout_session['payment_status'] == 'unpaid':
+        checkout_session['payment_status'] = 'paid'
 
     return redirect(checkout_session.url, code=303)
 
 #STOKTAN DUSME 
 def success_view(request):
 
-    return render(request, 'success.html')
+    print(checkout_session['payment_status'])
+    if checkout_session['payment_status'] == 'paid':
+        addresses = Address.objects.all().select_related('order') 
+        for address in addresses:
+            quantity = address.order.product.stock
+
+            print(address.order.quantity)
+            print(address.order.product.id)
+            print(quantity)
+
+            product = Product.objects.get(id=address.order.product.id)
+            product.stock = quantity - address.order.quantity
+            product.save()
+            checkout_session['payment_status'] = 'unpaid'
+            return render(request, 'success.html')
+        
+    else:
+        return render(request, 'success.html')
