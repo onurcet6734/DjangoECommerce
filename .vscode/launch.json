@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Python: Django",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "runserver",
+                "localhost:5555"
+            ],
+            "django": true,
+            "stopOnEntry": false,
+            "cwd": "${workspaceFolder}",
+        }
+    ]
+}
