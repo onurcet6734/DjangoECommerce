@@ -7,12 +7,14 @@ import json
 class ViewsTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.username = "ali_coban"
+        self.password = "1234_?=)"
+        self.user = User.objects.create_user(username= self.username, password=self.password)
         self.category = Category.objects.create(name='Test Category')
         self.product = Product.objects.create(category=self.category, title='Test Product', price=10)
 
     def test_index_view(self):
-        response = self.client.get(reverse('index'))
+        response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'index.html')
 
