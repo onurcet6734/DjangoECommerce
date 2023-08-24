@@ -286,3 +286,4 @@ def success_view(request):
         
     else:
         return render(request, 'success.html')
+    
