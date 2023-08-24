@@ -14,7 +14,6 @@ from django.utils.decorators import method_decorator
 class IndexView(APIView):
     def get(self, request):
         products = Product.objects.select_related('category').all()
-        categories = Category.objects.all()
 
         category_id = request.GET.get('category_id')
         if category_id:
@@ -41,11 +40,9 @@ class IndexView(APIView):
                 pass
 
         product_serializer = ProductSerializer(products, many=True, context={'request': request})
-        category_serializer = CategorySerializer(categories, many=True)
 
         context = {
             'products': product_serializer.data,
-            'categories': category_serializer.data,
             'total_item_count': total_item_count,
             'search_query': search_query,
             'customer_from_cookie': customer_from_cookie,
@@ -81,6 +78,7 @@ class HandledLoginView(APIView):
             return render(request, 'login.html', {'message': 'Geçersiz kullanıcı adı veya şifre girişi yaptınız!'})
 
     def get(self, request):
+
         return render(request, 'login.html')
 
 class CartView(APIView):
@@ -95,13 +93,11 @@ class CartView(APIView):
             cargo_price = 0
 
         order_serializer = OrderSerializer(orders, many=True, context={'request': request})
-        category_serializer = CategorySerializer(Category.objects.all(), many=True)
 
         context = {
             'orders': order_serializer.data,
             'total_price_sum': total_price_sum,
             'total_item_count': total_item_count,
-            'categories': category_serializer.data,
             'cargo_price': cargo_price,
         }
 
@@ -153,9 +149,9 @@ class ProductDetailView(APIView):
         total_item_count = Order.objects.filter(customer=customer).count()
 
         product_serializer = ProductSerializer(product, context={'request': request})
-        category_serializer = CategorySerializer(Category.objects.all(), many=True)
 
-        return render(request, 'detail.html', {'product': product_serializer.data, 'total_item_count': total_item_count, 'categories': category_serializer.data})
+
+        return render(request, 'detail.html', {'product': product_serializer.data, 'total_item_count': total_item_count,})
 
     @method_decorator(login_required)
     def post(self, request, product_id):
@@ -191,13 +187,10 @@ class CheckoutView(APIView):
         total_price_sum = orders.aggregate(Sum('total_price'))['total_price__sum']
         total_item_count = orders.count()
 
-        category_serializer = CategorySerializer(Category.objects.all(), many=True)
-
 
         context = {
             'total_item_count': total_item_count,
             'total_price_sum': total_price_sum,
-            'categories': category_serializer.data,
         }
 
         if get_customer_from_cookie(request):
@@ -213,11 +206,11 @@ class CheckoutView(APIView):
             return redirect('index')
         total_price_sum = orders.aggregate(Sum('total_price'))['total_price__sum']
         total_item_count = orders.count()
-        category_serializer = CategorySerializer(Category.objects.all(), many=True)
+
         context = {
             'total_item_count': total_item_count,
             'total_price_sum': total_price_sum,
-            'categories': category_serializer.data,
+
         }
         if get_customer_from_cookie(request):
             return render(request, 'address_form.html', context)
