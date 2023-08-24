@@ -74,12 +74,22 @@ class Address(models.Model):
 
     
 class Comment(models.Model):
+    RATE_CHOICES = (
+    (1, '1'),
+    (2, '2'),
+    (3, '3'),
+    (4, '4'),
+    (5, '5'),)  
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
-    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     subject = models.CharField(max_length=50,blank=True)
     comment = models.TextField(max_length=200,blank=True)
-    rate = models.IntegerField(blank=True)
+    rate = models.IntegerField(choices=RATE_CHOICES, blank=True)
     created_at = models.DateTimeField(auto_now_add=True,  editable=False)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True)
+
+
+    def __str__(self):
+        return self.comment
 
 # class Payment(models.Model):
 #     order = models.OneToOneField(Order, on_delete=models.CASCADE)

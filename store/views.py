@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Category, Product, Order, Customer, Address
+from .models import Category, Product, Order, Customer, Address,Comment
 from django.http import JsonResponse
 from django.db.models import Sum, Q
 from django.contrib.auth.decorators import login_required
@@ -149,9 +149,11 @@ class ProductDetailView(APIView):
         total_item_count = Order.objects.filter(customer=customer).count()
 
         product_serializer = ProductSerializer(product, context={'request': request})
+        comments = Comment.objects.select_related('customer', 'product').filter(product = product_id)
 
 
-        return render(request, 'detail.html', {'product': product_serializer.data, 'total_item_count': total_item_count,})
+
+        return render(request, 'detail.html', {'comments':comments,'product': product_serializer.data, 'total_item_count': total_item_count,})
 
     @method_decorator(login_required)
     def post(self, request, product_id):
