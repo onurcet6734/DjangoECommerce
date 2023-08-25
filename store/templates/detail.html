@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} {% block content %}
+{% extends 'base.html' %} {% load static %}{% load tz %} {% block content %}
 <div class="container" style="margin-top: 75px;">
     
   <div class="row">
@@ -53,7 +53,7 @@
                 <div class="card-body p-4">
                   <div>
                     <h5>{{comment.customer.name}}</h5>
-                    <p class="small">5 saat önce</p>
+                    <p class="small">{{comment.created_at|timezone:"Europe/Istanbul"|date:"d-m-Y H:i:s" }}</p>
                     <p>
                       {{comment}}
                     </p>

@@ -43,7 +43,9 @@ class Order(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True,  editable=False)
-    is_admin_product = models.BooleanField(default=True)  
+    is_admin_product = models.BooleanField(default=True)
+    is_completed = models.BooleanField(default=False)  
+  
 
 
     def save(self, *args, **kwargs):
