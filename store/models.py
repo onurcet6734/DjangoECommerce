@@ -83,7 +83,6 @@ class Comment(models.Model):
     (4, '4'),
     (5, '5'),)  
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
-    subject = models.CharField(max_length=50,blank=True)
     comment = models.TextField(max_length=200,blank=True)
     rate = models.IntegerField(choices=RATE_CHOICES, blank=True)
     created_at = models.DateTimeField(auto_now_add=True,  editable=False)
@@ -91,7 +90,7 @@ class Comment(models.Model):
 
 
     def __str__(self):
-        return f"{self.comment}->{self.product}"
+        return f"{self.comment}"
 
 
 # class Payment(models.Model):

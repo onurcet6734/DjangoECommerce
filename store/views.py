@@ -141,19 +141,35 @@ def delete_order(request,order_id):
     order.delete()
     return redirect('cart')
 
+@method_decorator(login_required)
+def add_comment(request,product_id):
+    customer = Customer.objects.get_or_create(user=request.user)
+    product = get_object_or_404(Product, id=product_id)
+
+    checkCompletedOrder = Order.objects.select_related('customer').get(customer = customer.id).is_completed
+    if checkCompletedOrder:
+        pass
+        comment = Comment(
+            product = product,
+            comment = request.POST.get('comment'),
+            rate = request.POST.get('rate'),
+            customer = customer,
+        )
+        comment.save()
+    else:
+        pass
+
 class ProductDetailView(APIView):
     @method_decorator(login_required)
     def get(self, request, product_id):
         product = get_object_or_404(Product, id=product_id)
         customer, created = Customer.objects.get_or_create(user=request.user)
         total_item_count = Order.objects.filter(customer=customer).count()
-        print("///")
-        print(product.id)
-
+        
         product_serializer = ProductSerializer(product, context={'request': request})
         comments = Comment.objects.select_related('customer', 'product').filter(product = product_id)
-
-
+        print("///")
+        print(customer)
 
         return render(request, 'detail.html', {'comments':comments,'product': product_serializer.data, 'total_item_count': total_item_count,})
 
