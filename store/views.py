@@ -147,6 +147,8 @@ class ProductDetailView(APIView):
         product = get_object_or_404(Product, id=product_id)
         customer, created = Customer.objects.get_or_create(user=request.user)
         total_item_count = Order.objects.filter(customer=customer).count()
+        print("///")
+        print(product.id)
 
         product_serializer = ProductSerializer(product, context={'request': request})
         comments = Comment.objects.select_related('customer', 'product').filter(product = product_id)
@@ -267,7 +269,6 @@ def payment_checkout(request):
 
 #STOKTAN DUSME 
 def success_view(request):
-
     print(checkout_session['payment_status'])
     if checkout_session['payment_status'] == 'paid':
         addresses = Address.objects.all().select_related('order') 
@@ -282,6 +283,7 @@ def success_view(request):
             product.stock = quantity - address.order.quantity
             product.save()
             checkout_session['payment_status'] = 'unpaid'
+            Order.objects.filter(product=product).update(is_completed = True) 
             return render(request, 'success.html')
         
     else:

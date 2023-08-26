@@ -91,7 +91,8 @@ class Comment(models.Model):
 
 
     def __str__(self):
-        return self.comment
+        return f"{self.comment}->{self.product}"
+
 
 # class Payment(models.Model):
 #     order = models.OneToOneField(Order, on_delete=models.CASCADE)

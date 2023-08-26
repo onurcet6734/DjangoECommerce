@@ -53,6 +53,14 @@
                 <div class="card-body p-4">
                   <div>
                     <h5>{{comment.customer.name}}</h5>
+                    <div>
+                      <i class='fa fa-star{% if comment.rate < 1 %}-o empty{% endif %}'style='color: #f3da35'></i>
+                      <i class='fa fa-star{% if comment.rate < 2 %}-o empty{% endif %}'style='color: #f3da35'></i>
+                      <i class='fa fa-star{% if comment.rate < 3 %}-o empty{% endif %}'style='color: #f3da35'></i>
+                      <i class='fa fa-star{% if comment.rate < 4 %}-o empty{% endif %}'style='color: #f3da35'></i>
+                      <i class='fa fa-star{% if comment.rate < 5 %}-o empty{% endif %}'style='color: #f3da35'></i>
+                    </div>
+                            
                     <p class="small">{{comment.created_at|timezone:"Europe/Istanbul"|date:"d-m-Y H:i:s" }}</p>
                     <p>
                       {{comment}}
@@ -63,6 +71,7 @@
             </div>
             {% endfor %}
           </div>
+          {% if customer_from_cookie %}
           <div class="col-md-10 col-lg-8 col-xl-6">
             <div class="card" style="position:relative;top:15px">
               <div class="card-body p-4">
@@ -75,14 +84,20 @@
                     height="65"
                   />
                   <div class="w-100">
-                    <h5>Ali Çoban</h5>
+                    <h5>{{customer_from_cookie}}</h5>
                     <div class="form-outline">
                       <textarea
                         class="form-control"
                         id="textAreaExample"
                         rows="4"
                       ></textarea>
-                      <label class="form-label" for="textAreaExample">What is your view?</label>
+                      <div>
+                        <i class='fa fa-star' style='color: #f3da35'></i>
+                        <i class='fa fa-star' style='color: #f3da35'></i>
+                        <i class='fa fa-star' style='color: #f3da35'></i>
+                        <i class='fa fa-star' style='color: #f3da35'></i>
+                        <i class='fa fa-star' style='color: #f3da35'></i>
+                      </div>
                     </div>
                     <div class="d-flex justify-content-between mt-3">
                       <button type="button" class="btn btn-success">Yorum yap</button>
@@ -91,7 +106,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div>{% endif %}
         </div>
       </div>
   
