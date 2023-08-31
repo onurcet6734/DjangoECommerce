@@ -145,7 +145,7 @@ def delete_order(request,order_id):
 
 
 def add_comment(request, product_id):
-    url = request.META.get("HTTP_REFERER")
+    url = request.META.get("HTTP_REFERER") #bir önceki url i alır
     customer = Customer.objects.get(user=request.user)
     product = get_object_or_404(Product, id=product_id)
 
