@@ -145,6 +145,7 @@ def delete_order(request,order_id):
 
 
 def add_comment(request, product_id):
+    url = request.META.get("HTTP_REFERER")
     customer = Customer.objects.get(user=request.user)
     product = get_object_or_404(Product, id=product_id)
 
@@ -159,7 +160,7 @@ def add_comment(request, product_id):
                 rate=form.cleaned_data['rate'],
             )
             comment.save()
-            return redirect('index')
+            return redirect(url)
         
         print(form.errors)
     return redirect("index") 
