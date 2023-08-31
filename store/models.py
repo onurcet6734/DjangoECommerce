@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.forms import ModelForm
 
 
 class Category(models.Model):
@@ -91,6 +92,15 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.comment}"
+    
+
+class CommentForm(ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['rate', 'comment']
+        
+
+
 
 
 # class Payment(models.Model):

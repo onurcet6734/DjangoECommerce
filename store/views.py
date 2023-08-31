@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Category, Product, Order, Customer, Address,Comment
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.db.models import Sum, Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
@@ -10,6 +10,8 @@ from django.conf import settings
 import stripe
 from rest_framework.views import APIView
 from django.utils.decorators import method_decorator
+from store.models import CommentForm
+
 
 class IndexView(APIView):
     def get(self, request):
@@ -141,23 +143,27 @@ def delete_order(request,order_id):
     order.delete()
     return redirect('cart')
 
-@method_decorator(login_required)
-def add_comment(request,product_id):
-    customer = Customer.objects.get_or_create(user=request.user)
+
+def add_comment(request, product_id):
+    customer = Customer.objects.get(user=request.user)
     product = get_object_or_404(Product, id=product_id)
 
-    checkCompletedOrder = Order.objects.select_related('customer').get(customer = customer.id).is_completed
+    checkCompletedOrder = Order.objects.select_related('customer').get(customer=customer.id).is_completed
     if checkCompletedOrder:
-        pass
-        comment = Comment(
-            product = product,
-            comment = request.POST.get('comment'),
-            rate = request.POST.get('rate'),
-            customer = customer,
-        )
-        comment.save()
-    else:
-        pass
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = Comment(
+                customer=customer,
+                product=product,
+                comment=form.cleaned_data['comment'],
+                rate=form.cleaned_data['rate'],
+            )
+            comment.save()
+            return redirect('index')
+        
+        print(form.errors)
+    return redirect("index") 
+
 
 class ProductDetailView(APIView):
     @method_decorator(login_required)
