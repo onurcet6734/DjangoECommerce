@@ -1,4 +1,4 @@
-"# DjangoECommerce" 
+Django - ECommerce
 
 SCREENSHOTS:
 
@@ -10,7 +10,6 @@ SCREENSHOTS:
 
 ![Ekran Alıntısı4](https://github.com/onurcet6734/DjangoECommerce/assets/77331899/f8216f09-1061-44e9-b5d4-c75e20997934)
 
-![Ekran Alıntısı5](https://github.com/onurcet6734/DjangoECommerce/assets/77331899/690b9c17-a8f7-4843-86f6-213ee437512c)
-
+![Ekran Alıntısı5](https://github.com/onurcet6734/DjangoECommerce/assets/77331899/7c52267d-dc31-48e9-8176-a7143f605575)
 
 
