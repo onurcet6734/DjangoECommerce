@@ -29,7 +29,6 @@ class IndexView(APIView):
         customer_from_cookie = get_customer_from_cookie(request)
         
         custnumberid = Customer.objects.filter(name = customer_from_cookie).values_list('id', flat=True)
-        print(custnumberid)
         adminOrders = Order.objects.filter(is_admin_product = True)
         if customer_from_cookie!=None:
             adminOrders.update(is_admin_product=False, customer = custnumberid)
@@ -50,11 +49,8 @@ class IndexView(APIView):
             'customer_from_cookie': customer_from_cookie,
 
         }
-        # json_data = json.dumps(product_serializer.data)
-        # print(json_data)
         return render(request, "index.html", context)
 
-    @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
@@ -162,7 +158,6 @@ def add_comment(request, product_id):
             comment.save()
             return redirect(url)
         
-        print(form.errors)
     return redirect("index") 
 
 
@@ -170,20 +165,23 @@ class ProductDetailView(APIView):
     @method_decorator(login_required)
     def get(self, request, product_id):
         product = get_object_or_404(Product, id=product_id)
-        customer, created = Customer.objects.get_or_create(user=request.user)
+        customer = Customer.objects.get_or_create(user=request.user)
         total_item_count = Order.objects.filter(customer=customer).count()
         
         product_serializer = ProductSerializer(product, context={'request': request})
         comments = Comment.objects.select_related('customer', 'product').filter(product = product_id)
-        print("///")
-        print(customer)
-
-        return render(request, 'detail.html', {'comments':comments,'product': product_serializer.data, 'total_item_count': total_item_count,})
+        return render(request, 'detail.html', 
+                        {
+                          'comments':comments,
+                          'product': product_serializer.data, 
+                          'total_item_count': total_item_count
+                        }
+                    )
 
     @method_decorator(login_required)
     def post(self, request, product_id):
         product = get_object_or_404(Product, id=product_id)
-        customer, created = Customer.objects.get_or_create(user=request.user)
+        customer = Customer.objects.get_or_create(user=request.user)
 
         if request.method == 'POST':
             quantity = int(request.POST.get('quantity', 1))
@@ -260,7 +258,7 @@ checkout_session = stripe.checkout.Session.create(
         cancel_url='http://127.0.0.1:5555/',
     )
 
-@login_required
+# @login_required
 def payment_checkout(request):
 
     customer = get_object_or_404(Customer, user=request.user)
@@ -297,11 +295,6 @@ def success_view(request):
         addresses = Address.objects.all().select_related('order') 
         for address in addresses:
             quantity = address.order.product.stock
-
-            print(address.order.quantity)
-            print(address.order.product.id)
-            print(quantity)
-
             product = Product.objects.get(id=address.order.product.id)
             product.stock = quantity - address.order.quantity
             product.save()
