@@ -11,7 +11,7 @@ import stripe
 from rest_framework.views import APIView
 from django.utils.decorators import method_decorator
 from store.models import CommentForm
-
+from django.views import View
 
 class IndexView(APIView):
     def get(self, request):
@@ -161,19 +161,16 @@ def add_comment(request, product_id):
     return redirect("index") 
 
 
-class ProductDetailView(APIView):
-    @method_decorator(login_required)
+class ProductDetailView(View):
     def get(self, request, product_id):
         product = get_object_or_404(Product, id=product_id)
-        customer = Customer.objects.get_or_create(user=request.user)
+        customer , created = Customer.objects.get_or_create(user=request.user)
         total_item_count = Order.objects.filter(customer=customer).count()
-        
-        product_serializer = ProductSerializer(product, context={'request': request})
         comments = Comment.objects.select_related('customer', 'product').filter(product = product_id)
         return render(request, 'detail.html', 
                         {
                           'comments':comments,
-                          'product': product_serializer.data, 
+                          'product': product, 
                           'total_item_count': total_item_count
                         }
                     )
@@ -181,7 +178,7 @@ class ProductDetailView(APIView):
     @method_decorator(login_required)
     def post(self, request, product_id):
         product = get_object_or_404(Product, id=product_id)
-        customer = Customer.objects.get_or_create(user=request.user)
+        customer, created = Customer.objects.get_or_create(user=request.user)
 
         if request.method == 'POST':
             quantity = int(request.POST.get('quantity', 1))
@@ -242,66 +239,90 @@ class CheckoutView(APIView):
         else:
             return render(request, 'login.html')
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
-checkout_session = stripe.checkout.Session.create(
-        payment_method_types=[
-            'card',
-        ],
-        line_items=[
-            {
-                'price': 'price_1NRMgrDGClv24mi8EMjZuTe7',
-                'quantity': 1,
-            },
-        ],
-        mode='payment',
-        success_url='http://127.0.0.1:5555/success',
-        cancel_url='http://127.0.0.1:5555/',
-    )
+# stripe.api_key = settings.STRIPE_SECRET_KEY
+# checkout_session = stripe.checkout.Session.create(
+#         payment_method_types=[
+#             'card',
+#         ],
+#         line_items=[
+#             {
+#                 'price': 'price_1NRMgrDGClv24mi8EMjZuTe7',
+#                 'quantity': 1,
+#             },
+#         ],
+#         mode='payment',
+#         success_url='http://localhost:8000/success/',
+#         cancel_url='http://127.0.0.1:8000/fail',
+#     )
 
 # @login_required
 def payment_checkout(request):
 
+    if request.method != "POST":
+        return redirect("checkout")
+
     customer = get_object_or_404(Customer, user=request.user)
-    orders = Order.objects.filter(customer=customer).prefetch_related('product')
+    orders = Order.objects.filter(customer=customer).prefetch_related("product")
 
-    order = orders.latest('created_at')
-        
-    address_line1 = request.POST.get('address_line1')
-    address_line2 = request.POST.get('address_line2')
-    city = request.POST.get('city')
-    state = request.POST.get('state')
-    postal_code = request.POST.get('postal_code')
+    if not orders.exists():
+        return redirect("cart")
 
-    address = Address(
+    latest_order = orders.latest("created_at")
+
+    address_line1 = request.POST.get("address_line1")
+    address_line2 = request.POST.get("address_line2")
+    city = request.POST.get("city")
+    state = request.POST.get("state")
+    postal_code = request.POST.get("postal_code")
+
+    Address.objects.create(
         customer=customer,
-        order=order,
+        order=latest_order,
         address_line1=address_line1,
         address_line2=address_line2,
         city=city,
         state=state,
         postal_code=postal_code
     )
-    address.save()
 
-    if checkout_session['payment_status'] == 'unpaid':
-        checkout_session['payment_status'] = 'paid'
+    line_items = []
+
+    for order in orders:
+        line_items.append({
+            "price_data": {
+                "currency": "usd",
+                "product_data": {
+                    "name": order.product.title,
+                },
+                "unit_amount": int(order.product.price * 100),
+            },
+            "quantity": order.quantity,
+        })
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    checkout_session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=line_items,
+        mode="payment",
+        success_url="http://localhost:8000/success/?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url="http://localhost:8000/fail/",
+    )
 
     return redirect(checkout_session.url, code=303)
-
 #STOKTAN DUSME 
 def success_view(request):
-    print(checkout_session['payment_status'])
-    if checkout_session['payment_status'] == 'paid':
-        addresses = Address.objects.all().select_related('order') 
+    session_id = request.GET.get("session_id")
+    if not session_id:
+        return render(request, "success.html")
+    session = stripe.checkout.Session.retrieve(session_id)
+    if session.payment_status == "paid":
+        addresses = Address.objects.select_related("order", "order__product")
         for address in addresses:
-            quantity = address.order.product.stock
-            product = Product.objects.get(id=address.order.product.id)
-            product.stock = quantity - address.order.quantity
+            product = address.order.product
+            product.stock = product.stock - address.order.quantity
             product.save()
-            checkout_session['payment_status'] = 'unpaid'
-            Order.objects.filter(product=product).update(is_completed = True) 
-            return render(request, 'success.html')
-        
-    else:
-        return render(request, 'success.html')
+            Order.objects.filter(product=product).update(is_completed=True)
+        return render(request, "success.html")
+    return render(request, "success.html")
     
