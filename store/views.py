@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse ,HttpResponse
 from django.db.models import Sum, Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
@@ -7,9 +7,8 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.conf import settings
 import stripe
-
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
-
 from .models import Product, Order, Customer, Address, Comment
 from .utils import set_customer_cookie, get_customer_from_cookie
 from store.api.serializers import ProductSerializer, OrderSerializer, CustomerSerializer
@@ -304,60 +303,104 @@ class CheckoutView(APIView):
 
 class PaymentCheckoutView(View):
 
-
     @method_decorator(login_required)
     def post(self, request):
+        import ipdb; ipdb.set_trace()
+        payment_method = request.POST.get("payment_method")
+
+        address_line1 = request.POST.get("address_line1")
+        address_line2 = request.POST.get("address_line2")
+        city = request.POST.get("city")
+        state = request.POST.get("state")
+        postal_code = request.POST.get("postal_code")
 
         customer = get_object_or_404(Customer, user=request.user)
 
         orders = Order.objects.filter(
-            customer=customer
-        ).prefetch_related("product")
+            customer=customer,
+            is_completed=False
+        ).select_related("product")
 
         if not orders.exists():
             return redirect("cart")
 
-        latest_order = orders.latest("created_at")
-
-        Address.objects.create(
-            customer=customer,
-            order=latest_order,
-            address_line1=request.POST.get("address_line1"),
-            address_line2=request.POST.get("address_line2"),
-            city=request.POST.get("city"),
-            state=request.POST.get("state"),
-            postal_code=request.POST.get("postal_code")
-        )
-
-        line_items = []
-
+        # adresi kaydet
         for order in orders:
+            Address.objects.create(
+                order=order,
+                address_line1=address_line1,
+                address_line2=address_line2,
+                city=city,
+                state=state,
+                postal_code=postal_code
+            )
 
-            line_items.append({
-                "price_data": {
-                    "currency": "try",
-                    "product_data": {
-                        "name": order.product.title
-                    },
-                    "unit_amount": int(order.product.price * 100)
-                },
-                "quantity": order.quantity
-            })
+        if payment_method == "stripe":
 
-        stripe.api_key = settings.STRIPE_SECRET_KEY
+            from .payments.stripe import StripePayment 
+            stripe_payment = StripePayment()
+            checkout_session = stripe_payment.create_checkout_session(
+                orders=orders,
+                request=request
+            )
 
-        session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            line_items=line_items,
-            mode="payment",
-            success_url="http://localhost:8000/success/?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url="http://localhost:8000/cart/"
-        )
-
-        return redirect(session.url, code=303)
+            return redirect(checkout_session.url, code=303)
 
 
-class SuccessView(View):
+        elif payment_method == "iyzico":
+
+            from .payments.iyzico import IyzicoPayment
+            iyzico_payment = IyzicoPayment()
+            payment_url = iyzico_payment.create_checkout_form(
+                request=request,
+                orders=orders,
+                customer=customer
+            )
+
+            return redirect(payment_url)
+
+        return redirect("cart")
+    # @method_decorator(login_required)
+    # def post(self, request):
+
+    #     stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    #     customer = get_object_or_404(Customer, user=request.user)
+
+    #     orders = Order.objects.filter(
+    #         customer=customer,
+    #         is_completed=False
+    #     ).prefetch_related("product")
+
+    #     if not orders.exists():
+    #         return redirect("cart")
+
+    #     line_items = []
+
+    #     for order in orders:
+    #         line_items.append({
+    #             "price_data": {
+    #                 "currency": "try",
+    #                 "product_data": {
+    #                     "name": order.product.title
+    #                 },
+    #                 "unit_amount": int(order.product.price * 100),
+    #             },
+    #             "quantity": order.quantity,
+    #         })
+
+    #     checkout_session = stripe.checkout.Session.create(
+    #         payment_method_types=["card"],
+    #         line_items=line_items,
+    #         mode="payment",
+    #         success_url="http://localhost:8000/success/",
+    #         cancel_url="http://localhost:8000/",
+    #     )
+
+    #     return redirect(checkout_session.url, code=303)
+
+
+class SuccessView(View): 
 
 
     def get(self, request):
@@ -389,3 +432,43 @@ class SuccessView(View):
 
         return render(request, "success.html")
 
+# class StripeWebhookView(View):
+
+    # @method_decorator(csrf_exempt)
+    # def post(self, request):
+    #     import ipdb;ipdb.set_trace()
+    #     stripe.api_key = settings.STRIPE_SECRET_KEY
+    #     payload = request.body
+    #     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+
+    #     try:
+    #         event = stripe.Webhook.construct_event(
+    #             payload,
+    #             sig_header,
+    #             settings.STRIPE_WEBHOOK_SECRET
+    #         )
+    #     except Exception:
+    #         return HttpResponse(status=400)
+
+    #     if event["type"] == "checkout.session.completed":
+
+    #         session = event["data"]["object"]
+    #         metadata = session.get("metadata", {})
+    #         order_ids = metadata.get("order_ids", "")
+    #         customer_id = metadata.get("customer_id")
+
+    #         if not order_ids:
+    #             return HttpResponse(status=400)
+
+    #         order_ids = [int(i) for i in order_ids.split(",")]
+    #         orders = Order.objects.filter(id__in=order_ids, is_completed=False)
+
+    #         for order in orders:
+    #             product = order.product
+    #             product.stock -= order.quantity
+    #             product.save()
+
+    #             order.is_completed = True
+    #             order.save()
+
+    #     return HttpResponse(status=200)

@@ -1,12 +1,16 @@
 {% extends 'base.html' %}
 {% block title %}Adres Formu{% endblock %}
+
 {% block content %}
 <div class="container" style="margin-top: 100px">
   <div class="row">
     <div class="col-md-6 offset-md-3">
+
       <h2>Adres Bilgileri</h2>
+
       <form action="{% url 'payment_checkout' %}" method="POST">
         {% csrf_token %}
+
         <table class="table">
           <tbody>
             <tr>
@@ -15,63 +19,70 @@
             </tr>
           </tbody>
         </table>
+
         <div class="form-group">
-          <label for="id_address_line1">Adres Satırı 1:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="id_address_line1"
-            name="address_line1"
-            value="{{ request.POST.address_line1 }}"
-          />
+          <label>Adres Satırı 1</label>
+          <input type="text" class="form-control" name="address_line1">
         </div>
+
         <div class="form-group">
-          <label for="id_address_line2">Adres Satırı 2:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="id_address_line2"
-            name="address_line2"
-            value="{{ request.POST.address_line2 }}"
-          />
+          <label>Adres Satırı 2</label>
+          <input type="text" class="form-control" name="address_line2">
         </div>
+
         <div class="form-group">
-          <label for="id_city">Şehir:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="id_city"
-            name="city"
-            value="{{ request.POST.city }}"
-          />
+          <label>Şehir</label>
+          <input type="text" class="form-control" name="city">
         </div>
+
         <div class="form-group">
-          <label for="id_state">Eyalet:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="id_state"
-            name="state"
-            value="{{ request.POST.state }}"
-          />
+          <label>Eyalet</label>
+          <input type="text" class="form-control" name="state">
         </div>
+
         <div class="form-group">
-          <label for="id_postal_code">Posta Kodu:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="id_postal_code"
-            name="postal_code"
-            value="{{ request.POST.postal_code }}"
-          />
+          <label>Posta Kodu</label>
+          <input type="text" class="form-control" name="postal_code">
         </div>
-        <input
-          type="hidden"
-          name="total_price_sum"
-          value="{{ total_price_sum }}"
-        />
-        <button type="submit" class="btn btn-primary">Siparişi Onayla</button>
+
+        <hr>
+
+        <h4>Ödeme Yöntemi</h4>
+
+        <div class="form-check">
+          <input class="form-check-input" type="radio"
+                 name="payment_method"
+                 value="stripe"
+                 id="stripe"
+                 checked>
+
+          <label class="form-check-label" for="stripe">
+            Stripe ile Öde
+          </label>
+        </div>
+
+        <div class="form-check">
+          <input class="form-check-input"
+                 type="radio"
+                 name="payment_method"
+                 value="iyzico"
+                 id="iyzico">
+
+          <label class="form-check-label" for="iyzico">
+            Iyzico ile Öde
+          </label>
+        </div>
+
+        <input type="hidden"
+               name="total_price_sum"
+               value="{{ total_price_sum }}">
+
+        <button type="submit" class="btn btn-primary mt-3">
+          Siparişi Onayla
+        </button>
+
       </form>
+
     </div>
   </div>
 </div>
