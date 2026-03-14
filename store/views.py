@@ -305,7 +305,6 @@ class PaymentCheckoutView(View):
 
     @method_decorator(login_required)
     def post(self, request):
-        import ipdb; ipdb.set_trace()
         payment_method = request.POST.get("payment_method")
 
         address_line1 = request.POST.get("address_line1")
@@ -334,7 +333,6 @@ class PaymentCheckoutView(View):
                 state=state,
                 postal_code=postal_code
             )
-
         if payment_method == "stripe":
 
             from .payments.stripe import StripePayment 
@@ -348,7 +346,6 @@ class PaymentCheckoutView(View):
 
 
         elif payment_method == "iyzico":
-
             from .payments.iyzico import IyzicoPayment
             iyzico_payment = IyzicoPayment()
             payment_url = iyzico_payment.create_checkout_form(

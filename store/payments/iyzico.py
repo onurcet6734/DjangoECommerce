@@ -75,5 +75,5 @@ class IyzicoPayment:
 
         import json
         response_json = json.loads(response)
-
+        import ipdb;ipdb.set_trace()
         return response_json["paymentPageUrl"]
