@@ -1,21 +1,16 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse ,HttpResponse
 from django.db.models import Sum, Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.conf import settings
 import stripe
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.views import APIView
 from .models import Product, Order, Customer, Address, Comment
-from .utils import set_customer_cookie, get_customer_from_cookie
-from store.api.serializers import ProductSerializer, OrderSerializer, CustomerSerializer
+from store.utils import set_customer_cookie
 from store.models import CommentForm
 from .payments.iyzico import IyzicoPayment
 from .payments.stripe import StripePayment 
-
 
 class IndexView(View):
 
@@ -53,7 +48,7 @@ class IndexView(View):
         return render(request, "index.html", context)
 
 
-class HandledLoginView(APIView):
+class HandledLoginView(View):
 
 
     def get(self, request):
@@ -89,12 +84,12 @@ class HandledLoginView(APIView):
         )
 
 
-class CartView(APIView):
+class CartView(View):
 
 
     @method_decorator(login_required)
     def get(self, request):
-
+        print("CartView aktif edildi")
         orders = Order.objects.select_related(
             'customer',
             'product'
@@ -111,60 +106,14 @@ class CartView(APIView):
         if total_price_sum and total_price_sum > 5000:
             cargo_price = 0
 
-        order_serializer = OrderSerializer(
-            orders,
-            many=True,
-            context={'request': request}
-        )
-
         context = {
-            'orders': order_serializer.data,
+            'orders': orders,
             'total_price_sum': total_price_sum,
             'total_item_count': total_item_count,
             'cargo_price': cargo_price
         }
 
         return render(request, "cart.html", context)
-
-
-class AddToCartView(APIView):
-
-
-    def post(self, request, product_id):
-
-        product = get_object_or_404(Product, pk=product_id)
-
-        quantity = int(request.POST.get('quantity', 1))
-
-        if request.user.is_authenticated:
-
-            try:
-                customer = Customer.objects.get(user=request.user)
-
-                order = Order.objects.create(
-                    customer=customer,
-                    product=product,
-                    quantity=quantity,
-                    total_price=product.price * quantity
-                )
-
-                product_serializer = ProductSerializer(
-                    product,
-                    context={'request': request}
-                )
-
-                customer_serializer = CustomerSerializer(customer)
-
-                return JsonResponse({
-                    'message': 'Item added to cart',
-                    'product': product_serializer.data,
-                    'customer': customer_serializer.data
-                })
-
-            except Customer.DoesNotExist:
-                return JsonResponse({'message': 'Customer not found'})
-
-        return JsonResponse({'message': 'Unauthorized user'})
 
 
 class DeleteOrderView(View):
@@ -277,7 +226,7 @@ class AddCommentView(View):
         return redirect("index")
 
 
-class CheckoutView(APIView):
+class CheckoutView(View):
 
 
     @method_decorator(login_required)
@@ -361,6 +310,16 @@ class PaymentCheckoutView(View):
 @method_decorator(csrf_exempt, name="dispatch")
 class SuccessView(View):
 
+    """
+        After entering payment details in the Stripe and Iyzico interfaces, Iyzico sends the HTTP request using the POST method, 
+        
+        while Stripe uses the GET method. 
+
+        Therefore, two methods (GET and POST) are required.
+
+        Once the card information is entered, a “Complete Payment” button appears. That's the part I'm referring to.
+    """
+
     def get(self, request):
         """
         Stripe success redirect
@@ -368,7 +327,11 @@ class SuccessView(View):
         payment_type = request.GET.get("payment_type")
 
         if payment_type == "stripe":
-            payment_status = self.handle_stripe(request)
+            session_id = request.GET.get("session_id")
+            if not session_id:
+                return False
+            session = stripe.checkout.Session.retrieve(session_id)
+            payment_status = session.payment_status
             if payment_status == "paid":
                 customer = get_object_or_404(Customer, user=request.user)
                 self.complete_orders(customer=customer)
@@ -410,11 +373,3 @@ class SuccessView(View):
 
             order.is_completed = True
             order.save()
-
-    def handle_stripe(self, request):
-        session_id = request.GET.get("session_id")
-        if not session_id:
-            return False
-
-        session = stripe.checkout.Session.retrieve(session_id)
-        return session.payment_status
