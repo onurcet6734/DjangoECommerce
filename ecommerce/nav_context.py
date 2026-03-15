@@ -1,11 +1,11 @@
 from store.models import Category
-from store.api.serializers import CategorySerializer
-from store.utils import get_customer_from_cookie
 
 def nav_data(request):
-     category_serializer = CategorySerializer(Category.objects.all(), many=True)
-     customer_from_cookie = get_customer_from_cookie(request)
-     context = {'categories': category_serializer.data,'customer_from_cookie': customer_from_cookie,}
-     return context
-      
-            
+    categories = Category.objects.all()
+    customer_from_cookie = request.COOKIES.get('customer_id')
+
+    context = {
+        "categories": categories,
+        "customer_from_cookie": customer_from_cookie,
+    }
+    return context

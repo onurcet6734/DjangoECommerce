@@ -7,7 +7,6 @@ from django.views import View
 import stripe
 from django.views.decorators.csrf import csrf_exempt
 from .models import Product, Order, Customer, Address, Comment
-from store.utils import set_customer_cookie
 from store.models import CommentForm
 from .payments.iyzico import IyzicoPayment
 from .payments.stripe import StripePayment 
@@ -70,10 +69,9 @@ class HandledLoginView(View):
                 customer.update_name_from_user()
 
                 response = redirect('index')
-                set_customer_cookie(response, customer)
+                response.set_cookie('customer_id', customer)
 
                 return response
-
             except Customer.DoesNotExist:
                 return redirect('index')
 
