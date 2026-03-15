@@ -370,7 +370,8 @@ class SuccessView(View):
         if payment_type == "stripe":
             payment_status = self.handle_stripe(request)
             if payment_status == "paid":
-                self.complete_orders(request)
+                customer = get_object_or_404(Customer, user=request.user)
+                self.complete_orders(customer=customer)
 
         return render(request, "success.html")
 
@@ -381,40 +382,21 @@ class SuccessView(View):
         payment_type = request.GET.get("payment_type")
 
         if payment_type == "iyzico":
-            # conversationId artık callback URL query param olarak geliyor
             conversation_id = request.GET.get("conversationId")
             token = request.POST.get("token")
 
             if token and conversation_id:
-                self.complete_orders_iyzico(conversation_id)
+                customer = get_object_or_404(Customer, id=conversation_id)
+                self.complete_orders(customer=customer)
 
         return render(request, "success.html")
 
-    def complete_orders_iyzico(self, conversation_id):
+    def complete_orders(self, customer):
         """
-        IyziCo callback ile gelen customer_id üzerinden
-        orderları tamamla ve ürün stoklarını düş
+        Customer üzerinden orderları tamamla ve stok düş
         """
-        customer = get_object_or_404(Customer, id=conversation_id)
-
-        orders = Order.objects.filter(
-            customer=customer,
-            is_completed=False
-        ).select_related("product")
-
-        for order in orders:
-            product = order.product
-            product.stock -= order.quantity
-            product.save()
-
-            order.is_completed = True
-            order.save()
-
-    def complete_orders(self, request):
-        """
-        Stripe redirect ile gelen orderları tamamla ve stok düş
-        """
-        customer = Customer.objects.get(user=request.user)
+        if not customer:
+            return
 
         orders = Order.objects.filter(
             customer=customer,
