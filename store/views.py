@@ -13,6 +13,9 @@ from .models import Product, Order, Customer, Address, Comment
 from .utils import set_customer_cookie, get_customer_from_cookie
 from store.api.serializers import ProductSerializer, OrderSerializer, CustomerSerializer
 from store.models import CommentForm
+from .payments.iyzico import IyzicoPayment
+from .payments.stripe import StripePayment 
+
 
 class IndexView(View):
 
@@ -323,7 +326,7 @@ class PaymentCheckoutView(View):
         if not orders.exists():
             return redirect("cart")
 
-        # adresi kaydet
+        # Adresi kaydet
         for order in orders:
             Address.objects.create(
                 order=order,
@@ -333,139 +336,103 @@ class PaymentCheckoutView(View):
                 state=state,
                 postal_code=postal_code
             )
-        if payment_method == "stripe":
 
-            from .payments.stripe import StripePayment 
+        # Ödeme yönlendirmeleri
+        if payment_method == "stripe":
             stripe_payment = StripePayment()
             checkout_session = stripe_payment.create_checkout_session(
                 orders=orders,
                 request=request
             )
-
             return redirect(checkout_session.url, code=303)
 
-
         elif payment_method == "iyzico":
-            from .payments.iyzico import IyzicoPayment
             iyzico_payment = IyzicoPayment()
             payment_url = iyzico_payment.create_checkout_form(
                 request=request,
                 orders=orders,
                 customer=customer
             )
-
             return redirect(payment_url)
 
         return redirect("cart")
-    # @method_decorator(login_required)
-    # def post(self, request):
-
-    #     stripe.api_key = settings.STRIPE_SECRET_KEY
-
-    #     customer = get_object_or_404(Customer, user=request.user)
-
-    #     orders = Order.objects.filter(
-    #         customer=customer,
-    #         is_completed=False
-    #     ).prefetch_related("product")
-
-    #     if not orders.exists():
-    #         return redirect("cart")
-
-    #     line_items = []
-
-    #     for order in orders:
-    #         line_items.append({
-    #             "price_data": {
-    #                 "currency": "try",
-    #                 "product_data": {
-    #                     "name": order.product.title
-    #                 },
-    #                 "unit_amount": int(order.product.price * 100),
-    #             },
-    #             "quantity": order.quantity,
-    #         })
-
-    #     checkout_session = stripe.checkout.Session.create(
-    #         payment_method_types=["card"],
-    #         line_items=line_items,
-    #         mode="payment",
-    #         success_url="http://localhost:8000/success/",
-    #         cancel_url="http://localhost:8000/",
-    #     )
-
-    #     return redirect(checkout_session.url, code=303)
 
 
-class SuccessView(View): 
-
+@method_decorator(csrf_exempt, name="dispatch")
+class SuccessView(View):
 
     def get(self, request):
+        """
+        Stripe success redirect
+        """
+        payment_type = request.GET.get("payment_type")
 
-        session_id = request.GET.get("session_id")
-
-        if not session_id:
-            return render(request, "success.html")
-
-        session = stripe.checkout.Session.retrieve(session_id)
-
-        if session.payment_status == "paid":
-
-            addresses = Address.objects.select_related(
-                "order",
-                "order__product"
-            )
-
-            for address in addresses:
-
-                product = address.order.product
-
-                product.stock -= address.order.quantity
-                product.save()
-
-                Order.objects.filter(
-                    product=product
-                ).update(is_completed=True)
+        if payment_type == "stripe":
+            payment_status = self.handle_stripe(request)
+            if payment_status == "paid":
+                self.complete_orders(request)
 
         return render(request, "success.html")
 
-# class StripeWebhookView(View):
+    def post(self, request):
+        """
+        IyziCo callback
+        """
+        payment_type = request.GET.get("payment_type")
 
-    # @method_decorator(csrf_exempt)
-    # def post(self, request):
-    #     import ipdb;ipdb.set_trace()
-    #     stripe.api_key = settings.STRIPE_SECRET_KEY
-    #     payload = request.body
-    #     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+        if payment_type == "iyzico":
+            # conversationId artık callback URL query param olarak geliyor
+            conversation_id = request.GET.get("conversationId")
+            token = request.POST.get("token")
 
-    #     try:
-    #         event = stripe.Webhook.construct_event(
-    #             payload,
-    #             sig_header,
-    #             settings.STRIPE_WEBHOOK_SECRET
-    #         )
-    #     except Exception:
-    #         return HttpResponse(status=400)
+            if token and conversation_id:
+                self.complete_orders_iyzico(conversation_id)
 
-    #     if event["type"] == "checkout.session.completed":
+        return render(request, "success.html")
 
-    #         session = event["data"]["object"]
-    #         metadata = session.get("metadata", {})
-    #         order_ids = metadata.get("order_ids", "")
-    #         customer_id = metadata.get("customer_id")
+    def complete_orders_iyzico(self, conversation_id):
+        """
+        IyziCo callback ile gelen customer_id üzerinden
+        orderları tamamla ve ürün stoklarını düş
+        """
+        customer = get_object_or_404(Customer, id=conversation_id)
 
-    #         if not order_ids:
-    #             return HttpResponse(status=400)
+        orders = Order.objects.filter(
+            customer=customer,
+            is_completed=False
+        ).select_related("product")
 
-    #         order_ids = [int(i) for i in order_ids.split(",")]
-    #         orders = Order.objects.filter(id__in=order_ids, is_completed=False)
+        for order in orders:
+            product = order.product
+            product.stock -= order.quantity
+            product.save()
 
-    #         for order in orders:
-    #             product = order.product
-    #             product.stock -= order.quantity
-    #             product.save()
+            order.is_completed = True
+            order.save()
 
-    #             order.is_completed = True
-    #             order.save()
+    def complete_orders(self, request):
+        """
+        Stripe redirect ile gelen orderları tamamla ve stok düş
+        """
+        customer = Customer.objects.get(user=request.user)
 
-    #     return HttpResponse(status=200)
+        orders = Order.objects.filter(
+            customer=customer,
+            is_completed=False
+        ).select_related("product")
+
+        for order in orders:
+            product = order.product
+            product.stock -= order.quantity
+            product.save()
+
+            order.is_completed = True
+            order.save()
+
+    def handle_stripe(self, request):
+        session_id = request.GET.get("session_id")
+        if not session_id:
+            return False
+
+        session = stripe.checkout.Session.retrieve(session_id)
+        return session.payment_status

@@ -37,12 +37,12 @@ class StripePayment:
 
             mode="payment",
 
-            success_url="http://localhost:8000/success/?session_id={CHECKOUT_SESSION_ID}",
+            success_url="http://localhost:8000/success/?payment_type=stripe&session_id={CHECKOUT_SESSION_ID}",
 
             cancel_url="http://localhost:8000/cart/",
 
             metadata={
-                "order_ids": ",".join(order_ids)
+                "order_ids": ",".join(order_ids),
             }
 
         )
