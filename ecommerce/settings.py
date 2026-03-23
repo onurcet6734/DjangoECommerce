@@ -9,19 +9,24 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
 import os
 from pathlib import Path
+import environ
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / ".env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-zposk^29w6=0!t&69qoi_#f8#dghu&2h(a8+kk_(kd49x15got'
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -78,17 +83,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'eCommerceDb',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'PORT': '5432',
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        "PORT":env("DB_PORT"),
         'TEST': {
-            'NAME': 'ecommerce_test',
-        },
+            'NAME':env("TEST_DB_NAME"),
+        }        
     }
 }
 
@@ -149,7 +153,19 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  
 SESSION_SAVE_EVERY_REQUEST = True 
 
+PAGINATION_PAGE_SIZE = 3
+
+STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+
+IYZICO_API_KEY = env("IYZICO_API_KEY")
+IYZICO_SECRET_KEY = env("IYZICO_SECRET_KEY")
+IYZICO_BASE_URL = env("IYZICO_BASE_URL")
 
 
-STRIPE_PUBLIC_KEY = 'x'
-STRIPE_SECRET_KEY = 'x'
+# STRIPE_PUBLIC_KEY = 'pk_test_51NREc2DGClv24mi8DQuFMCempUmRBkZNqDWpqXVskA5XZOBAP6bhQY11NOFd2SMt5wZURNntJraXlVItIMkvHor400GEMwO6we'
+# STRIPE_SECRET_KEY = 'sk_test_51NREc2DGClv24mi8I0R2ErqqEAFECVhvlACWqG3KJ78FEBGQg96I7RYUyUkts7f39YR6sOwCYvBZ9iOo4NyNi55k00Fp7Rjo0F'
+
+# IYZICO_API_KEY = 'sandbox-etkBOaBAec7Zh6jLDL59Gng0xJV2o1tV'
+# IYZICO_SECRET_KEY = 'sandbox-uC9ysXfBn2syo7ZMOW2ywhYoc9z9hTHh'
+# IYZICO_BASE_URL = 'sandbox-api.iyzipay.com'
