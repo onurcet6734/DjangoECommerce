@@ -10,8 +10,6 @@ dist/
 media/
 .venv/
 
-esandms/esandms/settings.py
-
 # Environment Variables
 .env
 /venv
