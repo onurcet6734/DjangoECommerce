@@ -145,7 +145,8 @@ class CartView(View):
     @method_decorator(login_required)
     def get(self, request):
         orders = Order.objects.select_related("customer", "product").filter(
-            customer__user=request.user
+            customer__user=request.user,
+            is_completed=False
         )
 
         total_price_sum = orders.aggregate(Sum("total_price"))["total_price__sum"]
@@ -170,7 +171,7 @@ class DeleteOrderView(View):
 
     @method_decorator(login_required)
     def post(self, request, order_id):
-        order = get_object_or_404(Order, id=order_id, customer__user=request.user)
+        order = get_object_or_404(Order, id=order_id, is_completed=False, customer__user=request.user)            
         order.delete()
         return redirect("cart")
 
