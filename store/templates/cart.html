@@ -55,7 +55,7 @@
                     </tbody>
                 </table>
                 <div class="text-right">
-                    <form action="{% url 'checkout' %}" method="POST">
+                    <form action="{% url 'checkout' %}" method="GET">
                         {% csrf_token %}
                         <input type="submit" class="btn btn-primary" value="Siparişi Onayla">
                         <input type="hidden" name="total_price_sum" value="{{ total_price_sum }}">

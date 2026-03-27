@@ -12,72 +12,83 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static "style.css" %}">
-    {% block css_files%}
-
-    {% endblock %}
-
+    {% block css_files %}{% endblock %}
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
-            
-            <a class="navbar-brand" href="#">E-Ticaret</a>
+
+            <a class="navbar-brand" href="{% url 'index' %}">E-Ticaret</a>
 
             <form method="GET" action="{% url 'index' %}">
                 <input type="text" name="q" placeholder="Ürün Arayınız.">
                 <button type="submit">Ara</button>
-            </form>  
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            </form>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
+
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Ana Sayfa</a>
+                        <a class="nav-link" href="{% url 'index' %}">Ana Sayfa</a>
                     </li>
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="kategoriDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Tüm Kategoriler
                         </a>
                         <div class="dropdown-menu" aria-labelledby="kategoriDropdown">
                             {% for category in categories %}
-                            <a class="dropdown-item"  href="{% url 'index' %}?category_id={{ category.id }}">{{ category.name }}</a>
+                            <a class="dropdown-item" href="{% url 'index' %}?category_id={{ category.id }}">
+                                {{ category.name }}
+                            </a>
                             {% endfor %}
                         </div>
-
-                          
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'cart' %}">
-                            <i class="fa fa-shopping-cart" style="margin-right: 5px;"></i> Sepetim 
+                            {% if request.user.is_authenticated %}
+                            <i class="fa fa-shopping-cart" style="margin-right: 5px;"></i> Sepetim
+                            {% endif %}
                             {% if total_item_count %}
-                                <span class="badge badge-pill badge-primary">
-                                    {{ total_item_count }}
-                                </span>
+                            <span class="badge badge-pill badge-primary">{{ total_item_count }}</span>
                             {% endif %}
                         </a>
                     </li>
 
-                    
-                    <li class="nav-item">
-                        {% if customer_from_cookie %}
+                    {% if request.user.is_authenticated %}
+                        {# Giriş yapılmış: kullanıcı adını göster #}
+                        <li class="nav-item">
                             <a class="nav-link" href="#">
-                                <i style="margin-right: 5px;"></i>{{ request.user.username }}
+                                <i class="fa fa-user" style="margin-right: 5px;"></i>
+                                {{ request.user.username }}
                             </a>
-                        {% else %}
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">
+                                <i class="fa fa-sign-out" style="margin-right: 5px;"></i> Çıkış Yap
+                            </a>
+                        </li>
+                    {% else %}
+                        {# Giriş yapılmamış: Giriş Yap + Üye Ol #}
+                        <li class="nav-item">
                             <a class="nav-link" href="{% url 'handledLogin' %}">
-                                <i style="margin-right: 5px;"></i> Giriş Yap
+                                <i class="fa fa-sign-in" style="margin-right: 5px;"></i> Giriş Yap
                             </a>
-                        {% endif %}
-                    </li>
-
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">
+                                <i class="fa fa-user-plus" style="margin-right: 5px;"></i> Üye Ol
+                            </a>
+                        </li>
+                    {% endif %}
 
                 </ul>
             </div>
@@ -86,9 +97,7 @@
 
     <br/>
 
-    {% block content %}
-  
-    {% endblock %}
+    {% block content %}{% endblock %}
 
     {% block additional_scripts %}
     <script>

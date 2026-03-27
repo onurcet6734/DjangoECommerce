@@ -17,7 +17,7 @@
       <p>Ürün Kategorisi: {{ product.category.name}}</p>
       <p>Stok Sayısı:{{ product.stock }}</p>
 
-      <form method="POST" action="{% url 'detail' product_id=product.id %}">
+      <form method="POST" action="{% url 'product_detail' product_id=product.id %}">
         {% csrf_token %}
         <input
           type="number"
@@ -85,7 +85,7 @@
             </div>
             {% endfor %}
           </div>
-          {% if customer_from_cookie %}
+          {% if user.is_authenticated %}
           <div class="col-md-10 col-lg-8 col-xl-6">
             <div class="card" style="position: relative; top: 15px">
               <div class="card-body p-4">
@@ -98,7 +98,8 @@
                     height="65"
                   />
                   <div class="w-100">
-                    <h5>{{customer_from_cookie}}</h5>
+                    <h5>{{request.user.username}}</h5>
+                    <h1>Deneme</h1>
 
                     <form
                       method="POST"
