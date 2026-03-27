@@ -55,7 +55,7 @@ class IndexView(View):
         if request.user.is_authenticated:
             try:
                 customer = Customer.objects.get(user=request.user)
-                total_item_count = Order.objects.filter(customer=customer).count()
+                total_item_count = Order.objects.filter(customer=customer , is_completed=False).count()
             except Customer.DoesNotExist:
                 pass
 
@@ -195,7 +195,7 @@ class ProductDetailView(View):
         if request.user.is_authenticated:
             try:
                 customer = Customer.objects.get(user=request.user)
-                total_item_count = Order.objects.filter(customer=customer).count()
+                total_item_count = Order.objects.filter(customer=customer, is_completed=False).count()
             except Customer.DoesNotExist:
                 pass
 
@@ -275,7 +275,6 @@ class CheckoutView(View):
 
     @method_decorator(login_required)
     def get(self, request):
-        import ipdb;ipdb.set_trace()
         customer = get_object_or_404(Customer, user=request.user)
         orders = Order.objects.filter(customer=customer, is_completed=False)
 
