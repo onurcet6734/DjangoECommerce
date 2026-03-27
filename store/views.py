@@ -145,7 +145,7 @@ class CartView(View):
     @method_decorator(login_required)
     def get(self, request):
         orders = Order.objects.select_related("customer", "product").filter(
-            customer__user=request.user, is_completed=False
+            customer__user=request.user
         )
 
         total_price_sum = orders.aggregate(Sum("total_price"))["total_price__sum"]

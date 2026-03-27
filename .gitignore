@@ -56,3 +56,5 @@ Thumbs.db
 *.wmv
 
 /db.sqlite3
+__pycache__/
+*.pyc
