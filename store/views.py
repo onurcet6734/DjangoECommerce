@@ -222,7 +222,7 @@ class ProductDetailView(View):
         quantity = int(request.POST.get("quantity", 1))
 
         try:
-            order = Order.objects.get(customer=customer, product=product)
+            order = Order.objects.get(customer=customer, product=product , is_completed=False)
             order.quantity += quantity
             order.total_price = product.price * order.quantity
             order.save()
@@ -232,6 +232,7 @@ class ProductDetailView(View):
                 product=product,
                 quantity=quantity,
                 total_price=product.price * quantity,
+                is_completed=False
             )
 
         return redirect("cart")
