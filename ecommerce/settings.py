@@ -87,22 +87,45 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        "PORT":env("DB_PORT"),
-        'TEST': {
-            'NAME':env("TEST_DB_NAME"),
-        }        
-    }
-}
+# Db Operation started
 
-if env.bool("PRODUCTION_MODE"):
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': env('DB_NAME'),
+#         'USER': env('DB_USER'),
+#         'PASSWORD': env('DB_PASSWORD'),
+#         "PORT":env("DB_PORT"),
+#         'TEST': {
+#             'NAME':env("TEST_DB_NAME"),
+#         }        
+#     }
+# }
+
+# if env.bool("PRODUCTION_MODE"):
+#     database_url = os.environ.get("DATABASE_URL")
+#     DATABASES["default"] = dj_database_url.parse(database_url)
+
+# Db Operation finished
+
+if env.bool("PRODUCTION_MODE", default=False):
     database_url = os.environ.get("DATABASE_URL")
-    DATABASES["default"] = dj_database_url.parse(database_url)
+    DATABASES = {
+        "default": dj_database_url.parse(database_url)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env('DB_NAME'),
+            'USER': env('DB_USER'),
+            'PASSWORD': env('DB_PASSWORD'),
+            "PORT": env("DB_PORT"),
+            'TEST': {
+                'NAME': env("TEST_DB_NAME"),
+            }
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
